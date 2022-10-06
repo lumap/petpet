@@ -1,4 +1,4 @@
-const token = "OTY2MjcxMDE2OTUzMzI3NjQ5.Yl_UAg.hImony3_xmiEBgRej1grHBGq8OE";
+const { token } = require("./token.json")
 const Discord = require('discord.js');
 const petpet = require('pet-pet-gif');
 let urlcheck = require('is-a-url');
