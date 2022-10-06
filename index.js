@@ -81,10 +81,7 @@ client.on("interactionCreate", async (interaction, _member) => {
             content: "Sorry, but it looks like something went wrong. Please retry with a valid file/link",
         })
     }
-    const randomStrings = ["add me to ur servers pls i want verified checkmark", "Pet!"];
-    const randomNum = Math.floor(Math.random() * 25);
     interaction.editReply({
-        content: randomNum == 8 ? randomStrings[Math.round(Math.random() * randomStrings.length)] : null,
         files: [
             {
                 attachment: gif,
