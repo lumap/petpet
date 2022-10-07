@@ -14,6 +14,7 @@ let rateLimits = [];
 
 client.on("interactionCreate", async (interaction, _member) => {
     if (!interaction.isCommand()) return;
+    const ephemeral = interaction.options.getBoolean("ephemeral") || false;
     rateLimits = rateLimits.filter(c => c.time + 60000 > Date.now());
     const userRatelimits = rateLimits.filter(c => c.id === interaction.user.id);
     if (userRatelimits.length > 5) {
@@ -23,7 +24,7 @@ client.on("interactionCreate", async (interaction, _member) => {
         });
     }
     try {
-        await interaction.deferReply();
+        await interaction.deferReply({ ephemeral: ephemeral });
     } catch {
         return;
     }
@@ -84,7 +85,6 @@ client.on("interactionCreate", async (interaction, _member) => {
         if (interaction.options.getInteger("resolution")) {
             options.resolution = interaction.options.getInteger("resolution")
         }
-        console.log(options.delay)
         gif = await petpet(content, options);
         rateLimits.push({ id: interaction.user.id, time: Date.now() });
     } catch {
@@ -99,7 +99,7 @@ client.on("interactionCreate", async (interaction, _member) => {
                 name: "pet.gif",
                 description: "Pet!"
             }
-        ]
+        ],
     });
 })
 

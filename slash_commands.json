@@ -48,6 +48,12 @@
                                 "value": 1024
                             }
                         ]
+                    },
+                    {
+                        "type": 5,
+                        "name": "ephemeral",
+                        "description": "Should the pet be an ephemeral command? Defaults to false",
+                        "required": false
                     }
                 ]
             },
@@ -95,6 +101,12 @@
                                 "value": 1024
                             }
                         ]
+                    },
+                    {
+                        "type": 5,
+                        "name": "ephemeral",
+                        "description": "Should the pet be an ephemeral command? Defaults to false",
+                        "required": false
                     }
                 ]
             },
@@ -142,6 +154,12 @@
                                 "value": 1024
                             }
                         ]
+                    },
+                    {
+                        "type": 5,
+                        "name": "ephemeral",
+                        "description": "Should the pet be an ephemeral command? Defaults to false",
+                        "required": false
                     }
                 ]
             },
@@ -189,6 +207,12 @@
                                 "value": 1024
                             }
                         ]
+                    },
+                    {
+                        "type": 5,
+                        "name": "ephemeral",
+                        "description": "Should the pet be an ephemeral command? Defaults to false",
+                        "required": false
                     }
                 ]
             }
