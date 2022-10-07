@@ -74,7 +74,18 @@ client.on("interactionCreate", async (interaction, _member) => {
     }
     let gif;
     try {
-        gif = await petpet(content);
+        const options = {
+            resolution: 128,
+            delay: 30
+        };
+        if (interaction.options.getInteger("delay")) {
+            options.delay = interaction.options.getInteger("delay")
+        }
+        if (interaction.options.getInteger("resolution")) {
+            options.resolution = interaction.options.getInteger("resolution")
+        }
+        console.log(options.delay)
+        gif = await petpet(content, options);
         rateLimits.push({ id: interaction.user.id, time: Date.now() });
     } catch {
         return interaction.editReply({
