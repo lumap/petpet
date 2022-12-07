@@ -3,8 +3,7 @@ import { handleMessageContextMenu } from "./functions/handleMessageContextMenu";
 import { handleUserContextMenu } from "./functions/handleUserContextMenu";
 import { handleSlashCommand } from "./functions/handleSlashCommand";
 import { isRatelimited } from "./functions/isRatelimited";
-import { config } from "../config"
-
+const config = require("../config.js")
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 

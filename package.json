@@ -1,5 +1,5 @@
 {
     "scripts": {
-        "start": "npx tsc && node ./dist/src/index.js"
+        "start": "npx tsc && node ./dist/index.js"
     }
 }
