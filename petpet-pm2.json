@@ -1,0 +1,9 @@
+{
+    "apps": [
+        {
+            "name": "petpet",
+            "script": "npm",
+            "args": "start"
+        }
+    ]
+}

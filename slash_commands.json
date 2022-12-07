@@ -217,5 +217,10 @@
                 ]
             }
         ]
+    },
+    {
+        "type": 1,
+        "name": "invite",
+        "description": "Get an invite link to add me to your servers"
     }
 ]
