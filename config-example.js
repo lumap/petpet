@@ -1,5 +1,6 @@
 const config = {
-    token: ""
+    token: "",
+    petCounterWebhook: ""
 }
 
 module.exports = config;

@@ -15,10 +15,11 @@ request from `lumap@duck.com`.
 
 ## Storage of Data
 
-Data is stored in a temporary array that gets cleaned often. However no
-guarantee is provided and the Bot owners assume no liability for the
-unintentional or malicious breach of Data. In the event of an unauthorised Data
-access, users will be notified through the Discord client application.
+Data is stored in a temporary array that gets cleaned often and in a number
+variable. However no guarantee is provided and the Bot owners assume no
+liability for the unintentional or malicious breach of Data. In the event of an
+unauthorised Data access, users will be notified through the Discord client
+application.
 
 ## User Rights
 
