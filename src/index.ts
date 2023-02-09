@@ -3,8 +3,8 @@ let urlcheck = require('is-a-url');
 const { parse } = require('twemoji-parser');
 const config = require("../config.js")
 const petpet = require('pet-pet-gif');
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
-let petCounter = 0;
+const client = new Client({ intents: [GatewayIntentBits.Guilds], ws: { properties: { browser: "Discord iOS" } } });
+let petCounter = 0, oldPetCounter = 0;
 let rateLimits: { time: number, id: string }[] = [];
 const axios = require('axios').default;
 
@@ -168,6 +168,10 @@ const axios = require('axios').default;
             updateCounter(interaction);
             return;
         }
+        if (interaction.commandName === "live-counter") {
+            liveCounter(interaction);
+            return;
+        }
         await interaction.deferReply({ ephemeral: ephemeral });
         let content = await getSlashURL(interaction);
         if (!content.startsWith("http")) {
@@ -227,9 +231,16 @@ const axios = require('axios').default;
     function updateCounter(interaction: ChatInputCommandInteraction) {
         if (interaction.user.id !== '635383782576357407') return interaction.reply({ content: "no", ephemeral: true });
         petCounter = interaction.options.getInteger("count")!;
+        client.user!.setPresence({ activities: [{ name: `${petCounter} petpets`, type: ActivityType.Watching }], status: 'idle' });
         return interaction.reply({
             content: "Alr, updated the counter to **" + petCounter + "**",
             ephemeral: true
+        });
+    }
+
+    function liveCounter(interaction: ChatInputCommandInteraction) {
+        return interaction.reply({
+            content: "Since February 2023, the bot has been used **" + petCounter + "** times!"
         });
     }
 
@@ -264,11 +275,6 @@ const axios = require('axios').default;
 
     function addPetCounter() {
         petCounter++;
-        if (petCounter.toString().endsWith("0")) {
-            axios.post(config.petCounterWebhook, {
-                content: `Number of petpets reached: **${petCounter}**!`
-            })
-        }
     }
 
 
@@ -289,10 +295,16 @@ const axios = require('axios').default;
     client.on("ready", () => {
         console.log("bot started ig")
         setActivity(client)
-        setInterval(setActivity, 600000, client)
+        setInterval(setActivity, 3600000, client)
     })
 
     function setActivity(client: Client) {
-        client.user!.setPresence({ activities: [{ name: `${petCounter} petpets`, type: ActivityType.Watching }], status: 'idle' });
+        if (oldPetCounter !== petCounter) {
+            client.user!.setPresence({ activities: [{ name: `${petCounter} petpets`, type: ActivityType.Watching }] });
+            axios.post(config.petCounterWebhook, {
+                content: `Last known petpet count: **${petCounter}**`
+            })
+            oldPetCounter = petCounter;
+        }
     }
 })();
