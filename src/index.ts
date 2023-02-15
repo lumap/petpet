@@ -4,7 +4,7 @@ const { parse } = require('twemoji-parser');
 const config = require("../config.js")
 const petpet = require('pet-pet-gif');
 const client = new Client({ intents: [GatewayIntentBits.Guilds], ws: { properties: { browser: "Discord iOS" } } });
-let petCounter = 0, oldPetCounter = 0;
+let petCounter = 0;
 let rateLimits: { time: number, id: string }[] = [];
 const axios = require('axios').default;
 
@@ -231,7 +231,7 @@ const axios = require('axios').default;
     function updateCounter(interaction: ChatInputCommandInteraction) {
         if (interaction.user.id !== '635383782576357407') return interaction.reply({ content: "no", ephemeral: true });
         petCounter = interaction.options.getInteger("count")!;
-        client.user!.setPresence({ activities: [{ name: `${petCounter} petpets`, type: ActivityType.Watching }], status: 'idle' });
+        setActivity(client);
         return interaction.reply({
             content: "Alr, updated the counter to **" + petCounter + "**",
             ephemeral: true
@@ -299,12 +299,9 @@ const axios = require('axios').default;
     })
 
     function setActivity(client: Client) {
-        if (oldPetCounter !== petCounter) {
-            client.user!.setPresence({ activities: [{ name: `${petCounter} petpets`, type: ActivityType.Watching }] });
-            axios.post(config.petCounterWebhook, {
-                content: `Last known petpet count: **${petCounter}**`
-            })
-            oldPetCounter = petCounter;
-        }
+        client.user!.setPresence({ activities: [{ name: `${petCounter} petpets`, type: ActivityType.Watching }] });
+        axios.post(config.petCounterWebhook, {
+            content: `Last known petpet count: **${petCounter}**`
+        })
     }
 })();
