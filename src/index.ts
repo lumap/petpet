@@ -56,7 +56,7 @@ const axios = require('axios').default;
     }
 
     function getAttachment(interaction: ChatInputCommandInteraction | MessageContextMenuCommandInteraction | UserContextMenuCommandInteraction): string {
-        let content: string;
+        let content: string = "nice try";
         const url = interaction.options.getAttachment("attachment")!.url;
         if (!urlcheck(url) || !isImage(url)) {
             content = "Sorry, this attachment does not seem to be valid. Please make sure it's a `jpg`, `jpeg` or `png` image.";
@@ -91,7 +91,7 @@ const axios = require('axios').default;
 
 
     async function getSlashURL(interaction: ChatInputCommandInteraction): Promise<string> {
-        let content: string = "tf did u do";
+        let content = "tf did u do";
         switch (interaction.options.getSubcommand()) {
             case "user": {
                 content = await getUserPFP(interaction);
@@ -118,23 +118,24 @@ const axios = require('axios').default;
 
 
     async function getUserPFP(interaction: ChatInputCommandInteraction | UserContextMenuCommandInteraction | MessageContextMenuCommandInteraction): Promise<string> {
-        let content: string;
+        let content: string = "nice try";
+        const user = interaction.options.getUser("user")!;
         if (interaction.guild) {
             try {
-                const member = await interaction.guild.members.fetch(interaction.options.getUser("user")!);
+                const member = await interaction.guild.members.fetch(user);
                 content = member.displayAvatarURL({ extension: "png", size: 1024 });
             } catch {
-                content = "This member doesn't seem to be here. If you want to petpet them, do it in my DMs.";
+                content = user.displayAvatarURL({ extension: "png", size: 1024 })!;
             }
         } else {
-            content = interaction.options.getUser("user")!.avatarURL({ extension: "png", size: 1024 })!;
+            content = user.displayAvatarURL({ extension: "png", size: 1024 })!;
         }
         return content;
     }
 
     async function handleMessageContextMenu(interaction: MessageContextMenuCommandInteraction, client: Client) {
-        await interaction.deferReply();
-        let content: string;
+        try { await interaction.deferReply() } catch { "why do u keep crashing here"; return; }
+        let content: string = "nice try";
         if (interaction.guild) {
             try {
                 const member = await interaction.guild.members.fetch(interaction.targetMessage.author.id);
@@ -172,7 +173,7 @@ const axios = require('axios').default;
             liveCounter(interaction);
             return;
         }
-        await interaction.deferReply({ ephemeral: ephemeral });
+        try { await interaction.deferReply({ ephemeral: ephemeral }) } catch { "why do u keep crashing here"; return; }
         let content = await getSlashURL(interaction);
         if (!content.startsWith("http")) {
             return interaction.editReply({
@@ -185,8 +186,8 @@ const axios = require('axios').default;
     }
 
     async function handleUserContextMenu(interaction: UserContextMenuCommandInteraction, client: Client) {
-        await interaction.deferReply();
-        let content: string;
+        try { await interaction.deferReply() } catch { "why do u keep crashing here"; return; }
+        let content: string = "nice try";
         if (interaction.guild) {
             try {
                 const member = await interaction.guild.members.fetch(interaction.targetId);
@@ -269,7 +270,7 @@ const axios = require('axios').default;
                     description: "Pet!"
                 }
             ],
-        });
+        }).then().catch(() => { });
         addPetCounter()
     }
 
