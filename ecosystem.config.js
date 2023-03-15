@@ -1,6 +1,12 @@
 module.exports = {
-    apps: [{
-        name: "petpet",
-        script: "npx tsc && npm start"
-    }]
+    apps: [
+        {
+            name: "petpet-prod",
+            script: "npx tsc && npm run prod"
+        },
+        {
+            name: "petpet-dev",
+            script: "npx tsc && npm run dev"
+        }
+    ]
 }

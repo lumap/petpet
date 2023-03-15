@@ -1,5 +1,6 @@
 const config = {
     token: "",
+    devToken: "",
     petCounterWebhook: ""
 }
 
