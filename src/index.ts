@@ -1,3 +1,5 @@
+import { Webhook } from "discord.js";
+import { GuildMember } from "discord.js";
 import { Client, GatewayIntentBits, CommandInteraction, UserContextMenuCommandInteraction, MessageContextMenuCommandInteraction, ChatInputCommandInteraction, ActivityType } from "discord.js";
 let urlcheck = require('is-a-url');
 const { parse } = require('twemoji-parser');
@@ -17,71 +19,6 @@ process.argv.forEach((val) => {
     }
 });
 
-function checkURL(interaction: ChatInputCommandInteraction): string {
-    let content;
-    const url = interaction.options.getString("url")!;
-    if (!urlcheck(url) || url.startsWith("https://tenor.com/view/") || !isImage(url)) {
-        content = "Sorry, this link does not seem to be valid. Please make sure the image link ends with `.jpg`, `.jpeg` or `.png`.";
-    } else {
-        content = url;
-    }
-    return content;
-}
-
-
-async function createGif(interaction: ChatInputCommandInteraction | MessageContextMenuCommandInteraction | UserContextMenuCommandInteraction, content: string): Promise<Buffer | boolean> {
-    let gif: Buffer | string;
-    try {
-        let options = {
-            resolution: 128,
-            delay: 30
-        };
-        if (interaction.isChatInputCommand()) {
-            if (interaction.options.getInteger("delay")) {
-                options.delay = interaction.options.getInteger("delay")!;
-            }
-            if (interaction.options.getInteger("resolution")) {
-                options.resolution = interaction.options.getInteger("resolution")!;
-            }
-        }
-        gif = await getPetGif(content);
-        if (typeof gif === "string") { return false; }
-        rateLimits.push({ id: interaction.user.id, time: Date.now() });
-    } catch {
-        interaction.editReply({
-            content: "Sorry, but it looks like something went wrong. Please retry with a valid file/link",
-        });
-        return false;
-    }
-    return gif;
-}
-
-function getAttachment(interaction: ChatInputCommandInteraction | MessageContextMenuCommandInteraction | UserContextMenuCommandInteraction): string {
-    let content: string;
-    const url = interaction.options.getAttachment("attachment")!.url;
-    if (!urlcheck(url) || !isImage(url)) {
-        content = "Sorry, this attachment does not seem to be valid. Please make sure it's a `jpg`, `jpeg` or `png` image.";
-    } else {
-        content = url;
-    }
-    return content;
-}
-
-function getEmoji(interaction: ChatInputCommandInteraction) {
-    let content;
-    const emoji = interaction.options.getString("emoji")!;
-    if ((emoji.match(/(<a?)?:\w+:(\d{16,20}>)?/u)) !== null) {
-        content = `https://cdn.discordapp.com/emojis/${emoji.split(":")[2].slice(0, -1)}.png`;
-        content = content.replaceAll(">", ""); //fixes a bug if multiple emojis are set as the argument
-    } else if (parse(emoji)?.[0]?.url) {
-        content = "Hello, default emojis are broken for the time being. Sorry for the interruption."
-    } else {
-        content = "I wasn't able to find an emoji in this. I wish discord had an \"emoji\" option for slash commands";
-    }
-    console.log(content);
-    return content;
-}
-
 async function getPetGif(content: string): Promise<Buffer | string> {
     let gif: any;
     try {
@@ -93,130 +30,71 @@ async function getPetGif(content: string): Promise<Buffer | string> {
 }
 
 
-async function getSlashURL(interaction: ChatInputCommandInteraction): Promise<string> {
+async function getSlashURL(interaction: ChatInputCommandInteraction): Promise<{ content: string, target: string }> {
     let content = "tf did u do";
+    let target = "h"
     switch (interaction.options.getSubcommand()) {
         case "user": {
-            content = await getUserPFP(interaction);
+            const user = interaction.options.getUser("user")!;
+            if (interaction.guild) {
+                try {
+                    const member = await interaction.guild.members.fetch(user);
+                    target = member.user.tag;
+                    content = member.displayAvatarURL({ extension: "png", size: 1024 });
+                } catch {
+                    target = user.tag;
+                    content = user.displayAvatarURL({ extension: "png", size: 1024 })!;
+                }
+            } else {
+                target = user.tag;
+                content = user.displayAvatarURL({ extension: "png", size: 1024 })!;
+            }
             break;
         }
         case "attachment": {
-            content = getAttachment(interaction);
+            const url = interaction.options.getAttachment("attachment")!.url;
+            if (!urlcheck(url) || !isImage(url)) {
+                content = "Sorry, this attachment does not seem to be valid. Please make sure it's a `jpg`, `jpeg` or `png` image.";
+            } else {
+                content = url;
+            }
+            target = "an attachment";
             break;
         }
         case "imageurl": {
-            content = checkURL(interaction);
+            const url = interaction.options.getString("url")!;
+            if (!urlcheck(url) || url.startsWith("https://tenor.com/view/") || !isImage(url)) {
+                content = "Sorry, this link does not seem to be valid. Please make sure the image link ends with `.jpg`, `.jpeg` or `.png`.";
+            } else {
+                content = url;
+            }
+            target = "an image from an external URL"
             break;
         }
         case "emoji": {
-            content = getEmoji(interaction);
+            const emoji = interaction.options.getString("emoji")!;
+            if ((emoji.match(/(<a?)?:\w+:(\d{16,20}>)?/u)) !== null) {
+                content = `https://cdn.discordapp.com/emojis/${emoji.split(":")[2].slice(0, -1)}.png`;
+                content = content.replaceAll(">", ""); //fixes a bug if multiple emojis are set as the argument
+            } else if (parse(emoji)?.[0]?.url) {
+                content = "Hello, default emojis are broken for the time being. Sorry for the interruption."
+            } else {
+                content = "I wasn't able to find an emoji in this. I wish discord had an \"emoji\" option for slash commands";
+            }
+            target = "an emoji";
             break;
         }
         default: {
             break;
         }
     }
-    return content;
+    return { content, target };
 }
 
-
-async function getUserPFP(interaction: ChatInputCommandInteraction | UserContextMenuCommandInteraction | MessageContextMenuCommandInteraction): Promise<string> {
-    let content: string = "nice try";
-    const user = interaction.options.getUser("user")!;
-    if (interaction.guild) {
-        try {
-            const member = await interaction.guild.members.fetch(user);
-            content = member.displayAvatarURL({ extension: "png", size: 1024 });
-        } catch {
-            content = user.displayAvatarURL({ extension: "png", size: 1024 })!;
-        }
-    } else {
-        content = user.displayAvatarURL({ extension: "png", size: 1024 })!;
-    }
-    return content;
-}
-
-async function handleMessageContextMenu(interaction: MessageContextMenuCommandInteraction, client: Client) {
-    try { await interaction.deferReply() } catch { "why do u keep crashing here"; return; }
-    let content: string = "nice try";
-    if (interaction.guild) {
-        try {
-            const member = await interaction.guild.members.fetch(interaction.targetMessage.author.id);
-            content = member.displayAvatarURL({ extension: "png", size: 1024 });
-        } catch {
-            content = "This member doesn't seem to be here. If you want to petpet them, do it in my DMs.";
-        }
-    } else {
-        const user = await client.users.fetch(interaction.targetMessage.author.id);
-        content = user.avatarURL({ extension: "png", size: 1024 })!;
-    }
-    if (!content.startsWith("http")) {
-        return interaction.editReply({
-            content: content
-        });
-    }
-    const gif = await getPetGif(content);
-    if (typeof gif === "string") {
-        return interaction.editReply({ content: "I fucked up" });
-    }
-    sendGif(interaction, gif)
-}
-
-async function handleSlashCommand(interaction: ChatInputCommandInteraction) {
-    const ephemeral = interaction.options.getBoolean("ephemeral") || false;
-    if (interaction.commandName === "invite") {
-        invite(interaction);
-        return;
-    }
-    if (interaction.commandName === "update-counter") {
-        updateCounter(interaction);
-        return;
-    }
-    if (interaction.commandName === "live-counter") {
-        liveCounter(interaction);
-        return;
-    }
-    try { await interaction.deferReply({ ephemeral: ephemeral }) } catch { "why do u keep crashing here"; return; }
-    let content = await getSlashURL(interaction);
-    if (!content.startsWith("http")) {
-        return interaction.editReply({
-            content: content
-        })
-    }
-    let gif = await createGif(interaction, content);
-    if (typeof gif === "boolean") return;
-    sendGif(interaction, gif)
-}
-
-async function handleUserContextMenu(interaction: UserContextMenuCommandInteraction, client: Client) {
-    try { await interaction.deferReply() } catch { "why do u keep crashing here"; return; }
-    let content: string = "nice try";
-    if (interaction.guild) {
-        try {
-            const member = await interaction.guild.members.fetch(interaction.targetId);
-            content = member.displayAvatarURL({ extension: "png", size: 1024 });
-        } catch {
-            content = "This member doesn't seem to be here. If you want to petpet them, do it in my DMs.";
-        }
-    } else {
-        const user = await client.users.fetch(interaction.targetId);
-        content = user.avatarURL({ extension: "png", size: 1024 })!;
-    }
-    if (!content.startsWith("http")) {
-        return interaction.editReply({
-            content: content
-        });
-    }
-    const gif = await getPetGif(content);
-    if (typeof gif === "string") {
-        return interaction.editReply({ content: "I fucked up" });
-    }
-    sendGif(interaction, gif)
-}
 
 function invite(interaction: ChatInputCommandInteraction) {
     return interaction.reply({
-        content: "Click the button below to add me to one of your servers, or share this link to your friends to invite me: <https://lumap-is.gay/petpet>",
+        content: "Click the button below to add me to one of your servers, or share this link to your friends to invite me: <https://lumap.fr/petpet>",
         components: [{
             type: 1,
             components: [
@@ -232,13 +110,18 @@ function invite(interaction: ChatInputCommandInteraction) {
     });
 }
 
+function support(interaction: ChatInputCommandInteraction) {
+    return interaction.reply({
+        content: "Join my support server! https://discord.gg/rFHhgbAuCK",
+        ephemeral: true
+    });
+}
+
 function updateCounter(interaction: ChatInputCommandInteraction) {
-    if (interaction.user.id !== '635383782576357407') return interaction.reply({ content: "no", ephemeral: true });
     petCounter = interaction.options.getInteger("count")!;
     setActivity(client);
     return interaction.reply({
-        content: "Alr, updated the counter to **" + petCounter + "**",
-        ephemeral: true
+        content: "Alr, updated the counter to **" + petCounter + "**"
     });
 }
 
@@ -264,13 +147,13 @@ function isRatelimited(interaction: CommandInteraction): boolean {
     return false;
 }
 
-function sendGif(interaction: CommandInteraction, gif: Buffer) {
+function sendGif(interaction: CommandInteraction, gif: Buffer, target: string) {
     interaction.editReply({
         files: [
             {
                 attachment: gif,
                 name: "pet.gif",
-                description: "Pet!"
+                description: `${interaction.user.tag} has pet ${target}`
             }
         ],
     }).then().catch(() => { });
@@ -281,6 +164,124 @@ function addPetCounter() {
     petCounter++;
 }
 
+
+async function handleMessageContextMenu(interaction: MessageContextMenuCommandInteraction, client: Client) {
+    try { await interaction.deferReply() } catch { "why do u keep crashing here"; return; }
+    let content: string = "nice try", target: string;
+    if (interaction.guild) {
+        try {
+            if (interaction.targetMessage.webhookId) {
+                target = interaction.targetMessage.author.username + " (webhook)"
+                content = interaction.targetMessage.author.displayAvatarURL({ extension: "png", size: 1024 })
+            } else {
+                const member = await interaction.guild.members.fetch(interaction.targetMessage.author.id);
+                target = member?.user?.tag;
+                content = member.displayAvatarURL({ extension: "png", size: 1024 });
+            }
+        } catch (e: any) {
+            console.log(e);
+            content = "This member doesn't seem to be here. If you want to petpet them, do it in my DMs.";
+            target = "h";
+        }
+    } else {
+        const user = await client.users.fetch(interaction.targetMessage.author.id);
+        target = user.tag;
+        content = user.avatarURL({ extension: "png", size: 1024 })!;
+    }
+    if (!content.startsWith("http")) {
+        return interaction.editReply({
+            content: content
+        });
+    }
+    const gif = await getPetGif(content);
+    if (typeof gif === "string") {
+        return interaction.editReply({ content: "I fucked up" });
+    }
+    sendGif(interaction, gif, target)
+}
+
+
+async function handleUserContextMenu(interaction: UserContextMenuCommandInteraction, client: Client) {
+    try { await interaction.deferReply() } catch { "why do u keep crashing here"; return; }
+    let content: string = "nice try";
+    let target: string = "h";
+    if (interaction.guild) {
+        try {
+            const member = await interaction.guild.members.fetch(interaction.targetId);
+            target = member.user.tag;
+            content = member.displayAvatarURL({ extension: "png", size: 1024 });
+        } catch {
+            content = "This member doesn't seem to be here. If you want to petpet them, do it in my DMs.";
+        }
+    } else {
+        const user = await client.users.fetch(interaction.targetId);
+        target = user.tag;
+        content = user.avatarURL({ extension: "png", size: 1024 })!;
+    }
+    if (!content.startsWith("http")) {
+        return interaction.editReply({
+            content: content
+        });
+    }
+    const gif = await getPetGif(content);
+    if (typeof gif === "string") {
+        return interaction.editReply({
+            content: "I fucked up"
+        });
+    }
+    sendGif(interaction, gif, target)
+}
+
+async function handleSlashCommand(interaction: ChatInputCommandInteraction) {
+    const ephemeral = interaction.options.getBoolean("ephemeral") || false;
+    if (interaction.commandName === "invite") {
+        invite(interaction);
+        return;
+    }
+    if (interaction.commandName === "update-counter") {
+        updateCounter(interaction);
+        return;
+    }
+    if (interaction.commandName === "live-counter") {
+        liveCounter(interaction);
+        return;
+    }
+    if (interaction.commandName === "support") {
+        support(interaction);
+        return;
+    }
+    try { await interaction.deferReply({ ephemeral: ephemeral }) } catch { "why do u keep crashing here"; return; }
+    let { content, target } = await getSlashURL(interaction);
+    if (!content?.startsWith("http")) {
+        return interaction.editReply({
+            content: content
+        })
+    }
+    let gif: Buffer | string
+    try {
+        let options = {
+            resolution: 128,
+            delay: 30
+        };
+        if (interaction.isChatInputCommand()) {
+            if (interaction.options.getInteger("delay")) {
+                options.delay = interaction.options.getInteger("delay")!;
+            }
+            if (interaction.options.getInteger("resolution")) {
+                options.resolution = interaction.options.getInteger("resolution")!;
+            }
+        }
+        gif = await getPetGif(content);
+        if (typeof gif === "string") { return; }
+        rateLimits.push({ id: interaction.user.id, time: Date.now() });
+    } catch {
+        interaction.editReply({
+            content: "Sorry, but it looks like something went wrong. Please retry with a valid file/link",
+        });
+        return;
+    }
+    sendGif(interaction, gif!, target)
+}
 
 client.on("interactionCreate", async (interaction) => {
     if (!interaction.isCommand()) return;
