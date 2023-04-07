@@ -7,11 +7,7 @@ const config = require("../config.js")
 const petpet = require('pet-pet-gif');
 const client = new Client({ intents: [GatewayIntentBits.Guilds], ws: { properties: { browser: "Discord iOS" } } });
 let petCounter = 0;
-let rateLimits: { time: number, id: string }[] = [];
 const axios = require('axios').default;
-setInterval(function () {
-    rateLimits = rateLimits.filter(c => c.time + 60000 > Date.now())
-}, 60000)
 let isDevMode = false;
 process.argv.forEach((val) => {
     if (val === "--dev") {
@@ -19,10 +15,10 @@ process.argv.forEach((val) => {
     }
 });
 
-async function getPetGif(content: string): Promise<Buffer | string> {
+async function getPetGif(content: string, options: any): Promise<Buffer | string> {
     let gif: any;
     try {
-        gif = await petpet(content);
+        gif = await petpet(content, options);
     } catch {
         gif = "ERROR";
     }
@@ -71,6 +67,20 @@ async function getSlashURL(interaction: ChatInputCommandInteraction): Promise<{ 
             target = "an image from an external URL"
             break;
         }
+        case "server": {
+            if (!interaction.guild) {
+                content = "This command is only possible in servers";
+                break;
+            }
+            const url = interaction.guild.iconURL({ extension: "png", size: 1024 });
+            if (!url) {
+                content = "This server does't have an icon."
+                break;
+            }
+            content = url;
+            target = "this server's icon"
+            break;
+        }
         case "emoji": {
             const emoji = interaction.options.getString("emoji")!;
             if ((emoji.match(/(<a?)?:\w+:(\d{16,20}>)?/u)) !== null) {
@@ -93,59 +103,56 @@ async function getSlashURL(interaction: ChatInputCommandInteraction): Promise<{ 
 
 
 function invite(interaction: ChatInputCommandInteraction) {
-    return interaction.reply({
-        content: "Click the button below to add me to one of your servers, or share this link to your friends to invite me: <https://lumap.fr/petpet>",
-        components: [{
-            type: 1,
-            components: [
-                {
-                    type: 2,
-                    label: "Invite Me",
-                    style: 5,
-                    url: "https://discord.com/api/oauth2/authorize?client_id=966271016953327649&permissions=51200&scope=applications.commands%20bot"
-                }
-            ]
-        }],
-        ephemeral: true
-    });
+    try {
+        return interaction.reply({
+            content: "Click the button below to add me to one of your servers, or share this link to your friends to invite me: <https://lumap.fr/petpet>",
+            components: [{
+                type: 1,
+                components: [
+                    {
+                        type: 2,
+                        label: "Invite Me",
+                        style: 5,
+                        url: "https://discord.com/api/oauth2/authorize?client_id=966271016953327649&permissions=51200&scope=applications.commands%20bot"
+                    }
+                ]
+            }],
+            ephemeral: true
+        });
+    } catch { }
 }
 
 function support(interaction: ChatInputCommandInteraction) {
-    return interaction.reply({
-        content: "Join my support server! https://discord.gg/rFHhgbAuCK",
-        ephemeral: true
-    });
+    try {
+        return interaction.reply({
+            content: "Join my support server! https://discord.gg/rFHhgbAuCK",
+            ephemeral: true
+        });
+    } catch { }
 }
 
 function updateCounter(interaction: ChatInputCommandInteraction) {
     petCounter = interaction.options.getInteger("count")!;
     setActivity(client);
-    return interaction.reply({
-        content: "Alr, updated the counter to **" + petCounter + "**"
-    });
+    try {
+        return interaction.reply({
+            content: "Alr, updated the counter to **" + petCounter + "**"
+        });
+    } catch { }
 }
 
 function liveCounter(interaction: ChatInputCommandInteraction) {
-    return interaction.reply({
-        content: "Since February 2023, the bot has been used **" + petCounter + "** times!"
-    });
+    try {
+        return interaction.reply({
+            content: "Since February 2023, the bot has been used **" + petCounter + "** times!"
+        });
+    } catch { }
 }
 
 function isImage(url: string) {
     return /\.(jpg|jpeg|png)$/.test(url.toLowerCase());
 }
 
-function isRatelimited(interaction: CommandInteraction): boolean {
-    const userRatelimits = rateLimits.filter(c => c.time + 60000 > Date.now()).filter(c => c.id === interaction.user.id);
-    if (userRatelimits.length > 5) {
-        interaction.reply({
-            ephemeral: true,
-            content: "You've been ratelimited (1 petpet per 10 seconds). This system has been put in place to prevent spam and power consuption from my server. Wait ~1 minute before being able to use the bot again."
-        });
-        return true;
-    }
-    return false;
-}
 
 function sendGif(interaction: CommandInteraction, gif: Buffer, target: string) {
     interaction.editReply({
@@ -180,7 +187,7 @@ async function handleMessageContextMenu(interaction: MessageContextMenuCommandIn
             }
         } catch (e: any) {
             console.log(e);
-            content = "This member doesn't seem to be here. If you want to petpet them, do it in my DMs.";
+            content = "This member doesn't seem to be here. If you want to petpet them, use their user ID as the `user` argument of `/petpet user`.";
             target = "h";
         }
     } else {
@@ -193,7 +200,11 @@ async function handleMessageContextMenu(interaction: MessageContextMenuCommandIn
             content: content
         });
     }
-    const gif = await getPetGif(content);
+    let options = {
+        resolution: 128,
+        delay: 30
+    };
+    const gif = await getPetGif(content, options);
     if (typeof gif === "string") {
         return interaction.editReply({ content: "I fucked up" });
     }
@@ -211,7 +222,7 @@ async function handleUserContextMenu(interaction: UserContextMenuCommandInteract
             target = member.user.tag;
             content = member.displayAvatarURL({ extension: "png", size: 1024 });
         } catch {
-            content = "This member doesn't seem to be here. If you want to petpet them, do it in my DMs.";
+            content = "This member doesn't seem to be here. If you want to petpet them, use their user ID as the `user` argument of `/petpet user`.";
         }
     } else {
         const user = await client.users.fetch(interaction.targetId);
@@ -223,7 +234,11 @@ async function handleUserContextMenu(interaction: UserContextMenuCommandInteract
             content: content
         });
     }
-    const gif = await getPetGif(content);
+    let options = {
+        resolution: 128,
+        delay: 30
+    };
+    const gif = await getPetGif(content, options);
     if (typeof gif === "string") {
         return interaction.editReply({
             content: "I fucked up"
@@ -271,9 +286,8 @@ async function handleSlashCommand(interaction: ChatInputCommandInteraction) {
                 options.resolution = interaction.options.getInteger("resolution")!;
             }
         }
-        gif = await getPetGif(content);
+        gif = await getPetGif(content, options);
         if (typeof gif === "string") { return; }
-        rateLimits.push({ id: interaction.user.id, time: Date.now() });
     } catch {
         interaction.editReply({
             content: "Sorry, but it looks like something went wrong. Please retry with a valid file/link",
@@ -285,7 +299,6 @@ async function handleSlashCommand(interaction: ChatInputCommandInteraction) {
 
 client.on("interactionCreate", async (interaction) => {
     if (!interaction.isCommand()) return;
-    if (isRatelimited(interaction)) return;
     if (interaction.isUserContextMenuCommand()) {
         handleUserContextMenu(interaction, client);
     } else if (interaction.isMessageContextMenuCommand()) {
