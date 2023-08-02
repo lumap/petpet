@@ -1,19 +1,9 @@
-import { Webhook } from "discord.js";
-import { GuildMember } from "discord.js";
 import { Client, GatewayIntentBits, CommandInteraction, UserContextMenuCommandInteraction, MessageContextMenuCommandInteraction, ChatInputCommandInteraction, ActivityType } from "discord.js";
 let urlcheck = require('is-a-url');
 const { parse } = require('twemoji-parser');
 const config = require("../config.js")
 const petpet = require('pet-pet-gif');
 const client = new Client({ intents: [GatewayIntentBits.Guilds], ws: { properties: { browser: "Discord iOS" } } });
-let petCounter = 0;
-const axios = require('axios').default;
-let isDevMode = false;
-process.argv.forEach((val) => {
-    if (val === "--dev") {
-        isDevMode = true;
-    }
-});
 
 async function getPetGif(content: string, options: any): Promise<Buffer | string> {
     let gif: any;
@@ -125,26 +115,8 @@ function invite(interaction: ChatInputCommandInteraction) {
 function support(interaction: ChatInputCommandInteraction) {
     try {
         return interaction.reply({
-            content: "Join my support server! https://discord.gg/rFHhgbAuCK",
+            content: "remind lumap to delete this kthx",
             ephemeral: true
-        });
-    } catch { }
-}
-
-function updateCounter(interaction: ChatInputCommandInteraction) {
-    petCounter = interaction.options.getInteger("count")!;
-    setActivity(client);
-    try {
-        return interaction.reply({
-            content: "Alr, updated the counter to **" + petCounter + "**"
-        });
-    } catch { }
-}
-
-function liveCounter(interaction: ChatInputCommandInteraction) {
-    try {
-        return interaction.reply({
-            content: "Since February 2023, the bot has been used **" + petCounter + "** times!"
         });
     } catch { }
 }
@@ -164,13 +136,7 @@ function sendGif(interaction: CommandInteraction, gif: Buffer, target: string) {
             }
         ],
     }).then().catch(() => { });
-    addPetCounter()
 }
-
-function addPetCounter() {
-    petCounter++;
-}
-
 
 async function handleMessageContextMenu(interaction: MessageContextMenuCommandInteraction, client: Client) {
     try { await interaction.deferReply() } catch { "why do u keep crashing here"; return; }
@@ -252,16 +218,7 @@ async function handleSlashCommand(interaction: ChatInputCommandInteraction) {
     if (interaction.commandName === "invite") {
         invite(interaction);
         return;
-    }
-    if (interaction.commandName === "update-counter") {
-        updateCounter(interaction);
-        return;
-    }
-    if (interaction.commandName === "live-counter") {
-        liveCounter(interaction);
-        return;
-    }
-    if (interaction.commandName === "support") {
+    } else if (interaction.commandName !== "petpet") {
         support(interaction);
         return;
     }
@@ -308,11 +265,7 @@ client.on("interactionCreate", async (interaction) => {
     }
 })
 
-if (isDevMode) {
-    client.login(config.devToken);
-} else {
-    client.login(config.token);
-}
+client.login(config.token);
 
 client.on("ready", () => {
     console.log("bot started ig")
@@ -321,10 +274,5 @@ client.on("ready", () => {
 })
 
 function setActivity(client: Client) {
-    client.user!.setPresence({ activities: [{ name: `${petCounter} petpets`, type: ActivityType.Watching }] });
-    if (!isDevMode) {
-        axios.post(config.petCounterWebhook, {
-            content: `Last known petpet count: **${petCounter}**`
-        })
-    }
+    client.user!.setPresence({ activities: [{ name: `petpets`, type: ActivityType.Watching }] });
 }
