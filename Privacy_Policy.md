@@ -1,12 +1,6 @@
 # Privacy Policy
 
-The use of this application ("Bot") in a server requires the collection of some
-specific user data ("Data"). Use of the Bot is considered an agreement to the
-terms of this Policy.
-
-## Collection and Storage of Data
-
-The Bot does not collect any data that can be linked to you.
+This application does not collect any specific user data that could be linked to you.
 
 ## Questions
 
