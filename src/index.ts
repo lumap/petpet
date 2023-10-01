@@ -3,7 +3,7 @@ let urlcheck = require('is-a-url');
 const { parse } = require('twemoji-parser');
 const config = require("../config.js")
 const petpet = require('pet-pet-gif');
-const client = new Client({ intents: [GatewayIntentBits.Guilds], ws: { properties: { browser: "Discord iOS" } } });
+const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 async function getPetGif(content: string, options: any): Promise<Buffer | string> {
     let gif: any;
