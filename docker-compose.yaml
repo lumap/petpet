@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+  bot:
+    build: .
+    init: true
+    volumes:
+      - .:/usr/app/
+      - /usr/app/node_modules
