@@ -1,10 +1,12 @@
-import { ChatInputCommandInteraction } from "discord.js";
+import { FastifyReply } from "fastify";
+import { sendMessage } from "../functions/interactions";
+import { APIChatInputApplicationCommandInteractionData } from "discord-api-types/v10";
+import { logCommand } from "../functions/logs";
 
-export function support(interaction: ChatInputCommandInteraction) {
-    try {
-        return interaction.reply({
-            content: "Join my support server through this invite: https://discord.gg/S5yryjRuse",
-            ephemeral: true
-        });
-    } catch { }
+export function support(interaction: APIChatInputApplicationCommandInteractionData, res: FastifyReply) {
+    logCommand("support");
+    return sendMessage(res, {
+        content: "Join my support server through this invite: https://discord.gg/S5yryjRuse",
+        flags: 64
+    });
 }

@@ -1,42 +1,35 @@
-import { Client, MessageContextMenuCommandInteraction } from "discord.js";
-import { sendGif } from "../functions/sendGif";
 import { makePetGif } from "../functions/makePetGif";
+import { APIApplicationCommandInteraction, APIMessageApplicationCommandInteractionData } from "discord-api-types/v10";
+import { FastifyReply } from "fastify";
+import { deferInteration, editMessage, editMessageWithAttachments } from "../functions/interactions";
+import { logCommand } from "../functions/logs";
 
-export async function petpetMsgCtx(interaction: MessageContextMenuCommandInteraction, client: Client) {
-    try { await interaction.deferReply(); } catch { "why do u keep crashing here"; return; }
-    let content: string = "nice try", target: string;
-    if (interaction.guild) {
-        try {
-            if (interaction.targetMessage.webhookId) {
-                target = interaction.targetMessage.author.username + " (webhook)";
-                content = interaction.targetMessage.author.displayAvatarURL({ extension: "png", size: 1024 });
-            } else {
-                const member = await interaction.guild.members.fetch(interaction.targetMessage.author.id);
-                target = member?.user?.tag;
-                content = member.displayAvatarURL({ extension: "png", size: 1024 });
-            }
-        } catch (e: any) {
-            console.log(e);
-            content = "This member doesn't seem to be here. If you want to petpet them, use their user ID as the `user` argument of `/petpet user`.";
-            target = "h";
-        }
-    } else {
-        const user = await client.users.fetch(interaction.targetMessage.author.id);
-        target = user.tag;
-        content = user.avatarURL({ extension: "png", size: 1024 })!;
-    }
-    if (!content.startsWith("http")) {
-        return interaction.editReply({
-            content: content
+export async function petpetMsgCtx(interaction: APIMessageApplicationCommandInteractionData, res: FastifyReply, ogInteraction: APIApplicationCommandInteraction) {
+    logCommand("petpetMsgCtx");
+    const msg = interaction.resolved.messages[interaction.target_id];
+    const avatarHash = msg.author.avatar;
+    const url = avatarHash ? `https://cdn.discordapp.com/avatars/${msg.author.id}/${avatarHash}.png?size=1024` : `https://cdn.discordapp.com/embed/avatars/${(Number(msg.author.id) >> 22) % 6}.png?size=1024`;
+    deferInteration(res);
+    let gif: Buffer | string;
+    try {
+        let options = {
+            resolution: 128,
+            delay: 30
+        };
+        gif = await makePetGif(url, options);
+        if (typeof gif === "string") { return; }
+    } catch {
+        return editMessage(ogInteraction, {
+            content: "Something fucked up, my bad. Please retry with something/someone else.",
         });
     }
-    let options = {
-        resolution: 128,
-        delay: 30
-    };
-    const gif = await makePetGif(content, options);
-    if (typeof gif === "string") {
-        return interaction.editReply({ content: "I fucked up" });
-    }
-    sendGif(interaction, gif, target);
+    return editMessageWithAttachments(ogInteraction, {
+        attachments: [
+            {
+                id: 0,
+                filename: "pet.gif",
+                description: `${ogInteraction.member?.user.username || ogInteraction.user?.username || "Someone"} has pet ${msg.author.username}`
+            }
+        ]
+    }, [gif]);
 }

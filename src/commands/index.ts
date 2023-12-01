@@ -4,5 +4,4 @@ import { petpetMsgCtx } from "./petpetMsgCtx";
 import { petpetUserCtx } from "./petpetUserCtx";
 import { support } from "./support";
 
-
-export default { petpet, invite, support, petpetMsgCtx, petpetUserCtx };;
+export default { support, invite, petpet, petpetMsgCtx, petpetUserCtx };

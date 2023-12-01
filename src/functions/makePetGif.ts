@@ -4,8 +4,8 @@ export async function makePetGif(content: string, options: any): Promise<Buffer 
     let gif: any;
     try {
         gif = await petpet(content, options);
-    } catch {
-        gif = "ERROR";
+    } catch (e) {
+        gif = "shit";
     }
     return gif;
 }

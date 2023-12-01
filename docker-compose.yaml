@@ -6,4 +6,6 @@ services:
     init: true
     volumes:
       - .:/usr/app/
-      - /usr/app/node_modules
+    command: bash -c "tsc && npm run start"
+    ports:
+      - ${PORT}:80

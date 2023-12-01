@@ -52,8 +52,7 @@
                     {
                         "type": 5,
                         "name": "ephemeral",
-                        "description": "Should the pet be an ephemeral command? Defaults to false",
-                        "required": false
+                        "description": "Should the pet be an ephemeral command? Defaults to false"
                     }
                 ]
             },
@@ -105,8 +104,7 @@
                     {
                         "type": 5,
                         "name": "ephemeral",
-                        "description": "Should the pet be an ephemeral command? Defaults to false",
-                        "required": false
+                        "description": "Should the pet be an ephemeral command? Defaults to false"
                     }
                 ]
             },
@@ -158,61 +156,7 @@
                     {
                         "type": 5,
                         "name": "ephemeral",
-                        "description": "Should the pet be an ephemeral command? Defaults to false",
-                        "required": false
-                    }
-                ]
-            },
-            {
-                "type": 1,
-                "name": "emoji",
-                "description": "Petpet an emoji",
-                "options": [
-                    {
-                        "type": 3,
-                        "name": "emoji",
-                        "description": "The emoji",
-                        "required": true
-                    },
-                    {
-                        "type": 4,
-                        "name": "delay",
-                        "description": "How much delay between two frames? Defaults to 30",
-                        "min_value": 15,
-                        "max_value": 1000
-                    },
-                    {
-                        "type": 4,
-                        "name": "resolution",
-                        "description": "How big should the gif be? Defaults to 128",
-                        "choices": [
-                            {
-                                "name": "64",
-                                "value": 64
-                            },
-                            {
-                                "name": "128",
-                                "value": 128
-                            },
-                            {
-                                "name": "256",
-                                "value": 256
-                            },
-                            {
-                                "name": "512",
-                                "value": 512
-                            },
-                            {
-                                "name": "1024",
-                                "value": 1024
-                            }
-                        ]
-                    },
-                    {
-                        "type": 5,
-                        "name": "ephemeral",
-                        "description": "Should the pet be an ephemeral command? Defaults to false",
-                        "required": false
+                        "description": "Should the pet be an ephemeral command? Defaults to false"
                     }
                 ]
             }
@@ -222,5 +166,20 @@
         "type": 1,
         "name": "invite",
         "description": "Get an invite link to add me to your servers"
+    },
+    {
+        "type": 2,
+        "name": "PetPet this user!",
+        "description": ""
+    },
+    {
+        "type": 3,
+        "name": "PetPet this message's author!",
+        "description": ""
+    },
+    {
+        "type": 1,
+        "name": "support",
+        "description": "Get an invite link to my support server"
     }
 ]
