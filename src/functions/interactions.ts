@@ -1,6 +1,6 @@
-import { InteractionResponseType, APIInteractionResponseCallbackData, RESTPostAPIInteractionCallbackJSONBody, APIInteraction, APIApplicationCommandInteraction, } from "discord-api-types/v10";
-import { FastifyReply } from "fastify";
 import axios from 'axios';
+import { APIApplicationCommandInteraction, APIInteraction, APIInteractionResponseCallbackData, InteractionResponseType, RESTPostAPIInteractionCallbackJSONBody, } from "discord-api-types/v10";
+import { FastifyReply } from "fastify";
 import FormData from 'form-data';
 import { logError } from "./logs";
 
@@ -17,9 +17,9 @@ export function deferInteration(res: FastifyReply) {
     } as RESTPostAPIInteractionCallbackJSONBody);
 }
 
-export function editMessage(interaction: APIInteraction, data: APIInteractionResponseCallbackData) {
+export async function editMessage(interaction: APIInteraction, data: APIInteractionResponseCallbackData) {
     try {
-        axios(`https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`, {
+        await axios(`https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json'
@@ -41,7 +41,7 @@ export async function editMessageWithAttachments(interaction: APIApplicationComm
     }
 
     try {
-        axios(`https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`, {
+        await axios(`https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': `multipart/form-data; boundary=${formData.getBoundary()}`
