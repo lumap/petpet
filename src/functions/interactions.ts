@@ -2,6 +2,7 @@ import { InteractionResponseType, APIInteractionResponseCallbackData, RESTPostAP
 import { FastifyReply } from "fastify";
 import axios from 'axios';
 import FormData from 'form-data';
+import { logError } from "./logs";
 
 export function sendMessage(res: FastifyReply, data: APIInteractionResponseCallbackData) {
     return res.code(200).send({
@@ -17,13 +18,17 @@ export function deferInteration(res: FastifyReply) {
 }
 
 export function editMessage(interaction: APIInteraction, data: APIInteractionResponseCallbackData) {
-    axios(`https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`, {
-        method: 'PATCH',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        data: JSON.stringify(data)
-    });
+    try {
+        axios(`https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            data: JSON.stringify(data)
+        });
+    } catch (e) {
+        logError(e);
+    }
 };
 
 
@@ -35,11 +40,15 @@ export async function editMessageWithAttachments(interaction: APIApplicationComm
         formData.append(`files[${i}]`, buffers[i], data.attachments!.find(c => c.id === i)!.filename);
     }
 
-    axios(`https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`, {
-        method: 'PATCH',
-        headers: {
-            'Content-Type': `multipart/form-data; boundary=${formData.getBoundary()}`
-        },
-        data: formData
-    });
+    try {
+        axios(`https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': `multipart/form-data; boundary=${formData.getBoundary()}`
+            },
+            data: formData
+        });
+    } catch (e) {
+        logError(e);
+    }
 };

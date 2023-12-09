@@ -8,4 +8,4 @@ services:
       - .:/usr/app/
     command: bash -c "tsc && npm run start"
     ports:
-      - ${PORT}:80
+      - 8083:80
