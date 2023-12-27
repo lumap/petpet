@@ -1,11 +1,11 @@
 // import commands from "./commands";
-import { APIInteraction, InteractionResponseType, InteractionType } from "discord-api-types/v10";
-import { FastifyReply, FastifyRequest, fastify } from "fastify";
-import { verify } from "discord-verify/node";
-require('dotenv').config();
 import crypto from "crypto";
+import { APIInteraction, InteractionResponseType, InteractionType } from "discord-api-types/v10";
+import { verify } from "discord-verify/node";
+import { FastifyReply, FastifyRequest, fastify } from "fastify";
 import { handleCommands } from "./functions/handleCommands";
 import { logBoot } from "./functions/logs";
+require('dotenv').config();
 
 const app = fastify({ logger: false, trustProxy: 1 });
 
@@ -36,7 +36,6 @@ app.post('/', async (req: FastifyRequest<{
     );
 
     if (!isValid) {
-        console.log("Invalid signature");
         return res.code(401).send("Invalid signature");
     }
 
