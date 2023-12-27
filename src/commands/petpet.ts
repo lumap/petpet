@@ -1,9 +1,9 @@
-import { makePetGif } from "../functions/makePetGif";
-import { isImage } from "../functions/isImage";
 import { APIApplicationCommandInteraction, APIChatInputApplicationCommandInteractionData, ApplicationCommandOptionType } from "discord-api-types/v10";
 import { FastifyReply } from "fastify";
 import { deferInteration, editMessage, editMessageWithAttachments, sendMessage } from "../functions/interactions";
+import { isImage } from "../functions/isImage";
 import { logCommand } from "../functions/logs";
+import { makePetGif } from "../functions/makePetGif";
 let urlcheck = require('is-a-url');
 
 export async function petpet(interaction: APIChatInputApplicationCommandInteractionData, res: FastifyReply, ogInteraction: APIApplicationCommandInteraction) {
@@ -43,7 +43,7 @@ export async function petpet(interaction: APIChatInputApplicationCommandInteract
             break;
         }
     }
-    deferInteration(res);
+    await deferInteration(res);
     let gif: Buffer | string;
     try {
         let options = {

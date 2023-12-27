@@ -11,8 +11,8 @@ export function sendMessage(res: FastifyReply, data: APIInteractionResponseCallb
     } as RESTPostAPIInteractionCallbackJSONBody);
 }
 
-export function deferInteration(res: FastifyReply) {
-    res.code(200).send({
+export async function deferInteration(res: FastifyReply) {
+    return await res.code(200).send({
         type: InteractionResponseType.DeferredChannelMessageWithSource
     } as RESTPostAPIInteractionCallbackJSONBody);
 }

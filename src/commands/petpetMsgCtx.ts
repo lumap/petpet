@@ -9,7 +9,7 @@ export async function petpetMsgCtx(interaction: APIMessageApplicationCommandInte
     const msg = interaction.resolved.messages[interaction.target_id];
     const avatarHash = msg.author.avatar;
     const url = avatarHash ? `https://cdn.discordapp.com/avatars/${msg.author.id}/${avatarHash}.png?size=1024` : `https://cdn.discordapp.com/embed/avatars/${(Number(msg.author.id) >> 22) % 6}.png?size=1024`;
-    deferInteration(res);
+    await deferInteration(res);
     let gif: Buffer | string;
     try {
         let options = {

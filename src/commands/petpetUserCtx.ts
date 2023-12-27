@@ -9,7 +9,7 @@ export async function petpetUserCtx(interaction: APIUserApplicationCommandIntera
     const user = interaction.resolved.users[interaction.target_id];
     const avatarHash = user.avatar;
     const url = avatarHash ? `https://cdn.discordapp.com/avatars/${user.id}/${avatarHash}.png?size=1024` : `https://cdn.discordapp.com/embed/avatars/${(Number(user.id) >> 22) % 6}.png?size=1024`;
-    deferInteration(res);
+    await deferInteration(res);
     let gif: Buffer | string;
     try {
         let options = {
