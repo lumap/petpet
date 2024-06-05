@@ -13,6 +13,7 @@ import uuid
 import time
 
 CLIENT_PUBLIC_KEY = os.getenv('CLIENT_PUBLIC_KEY')
+APPLICATION_ID = os.getenv('APPLICATION_ID')
 
 def file_url_to_bytesio(file_url):
     response = requests.get(file_url)
@@ -33,76 +34,104 @@ def before_request_func():
 @app.route('/interactions', methods=['POST'])
 @verify_key_decorator(CLIENT_PUBLIC_KEY)
 def interactions():
-  if request.json['type'] == InteractionType.APPLICATION_COMMAND:
+    # Check if request is even valid
+    if not request.json:
+        return jsonify({}), 400
+    if request.json['type'] != InteractionType.APPLICATION_COMMAND:
+        return jsonify({}), 400
+    
+    # Prepare response
     data = request.json['data']
     name = data['name']
-    response = {
-        'type': InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        'data': {
-            'content': 'Uhhh'
-        }
-    }
+    
+    # Hello command
     if name == 'hello':
-        response['data']['content'] = 'Hello world'
-        return jsonify(response)
+        response = {
+            'type': InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            'data': {
+                'content': 'Hello, world!'
+            }
+        }
+        return jsonify(response), 200
+    
+    # Petpet command
     elif name == 'petpet':
+        # Fetching options
+        options = {option['name']: option['value'] for option in data['options']}
+
+        # Acknowledge the interaction
+        interaction_id = request.json['id']
+        interaction_token = request.json['token']
+
+        api_url = f'https://discord.com/api/v9/interactions/{interaction_id}/{interaction_token}/callback'
+        body = {
+            'type': InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
+            'data': {
+                'flags': 64 if options.get('ephemeral') is True else 0
+            }
+        }
+        response = requests.post(api_url, json=body)
+
+        # Get author id
         author_id = None
         if request.json.get('member'):
             author_id = request.json['member']['user']['id']
         elif request.json['user']:
             author_id = request.json['user']['id']
 
-        options = {option['name']: option['value'] for option in data['options']}
-
+        # Get petpet user
         user_id = options['user']
         avatar_url = None
         resolved_user = data['resolved']['users'][user_id]
+
+        # Get avatar url of petpet user
         if data['resolved'].get('members') and data['resolved']['members'].get(user_id) and (data['resolved']['members'][user_id]['avatar'] is not None):
             avatar_hash = data['resolved']['members'][user_id]['avatar']
             avatar_url = f'https://cdn.discordapp.com/guilds/{request.json['guild_id']}/users/{user_id}/avatars/{avatar_hash}.png?size=1024'
         else:
             avatar_hash = resolved_user['avatar']
             avatar_url = f'https://cdn.discordapp.com/avatars/{user_id}/{avatar_hash}.png?size=1024'
-        avatar_bytes = file_url_to_bytesio(avatar_url)
-        output_bytes = BytesIO()
-
+            
+        # Generate petpet gif
         if options.get("resolution"):
             petpet.resolution = (options["resolution"], options["resolution"])
         if options.get("frame_delay"):
             petpet.delay = options["frame_delay"]
         if options.get("frame_count"):
             petpet.frames = options["frame_count"]
+
+        avatar_bytes = file_url_to_bytesio(avatar_url)
+        output_bytes = BytesIO()
+
         petpet.make(avatar_bytes, output_bytes)
-        
+
+        # Send the petpet gif
         file_name = 'petpet.gif'
-        response['data'] = {
-            'content': f'<@{author_id}> has pet <@{user_id}>',
-            'allowed_mentions': {
-                'parse': []
-            },
-            'attachments': [{ 'id': 0, 'filename': file_name, 'description': f'A gif of a hand patting the avatar of Discord user {resolved_user["global_name"]} ({resolved_user["username"]})' }],
-            'flags': 64 if options.get('ephemeral') is True else 0
+        api_url = f'https://discord.com/api/v9/webhooks/{APPLICATION_ID}/{interaction_token}/messages/@original'
+        body = {
+            'type': InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            'data': {
+                'content': f'<@{author_id}> has pet <@{user_id}>',
+                'allowed_mentions': {
+                    'parse': []
+                },
+                'attachments': [{ 'id': 0, 'filename': file_name, 'description': f'A gif of a hand patting the avatar of Discord user {resolved_user["global_name"]} ({resolved_user["username"]})' }],
+            }
         }
         files = {
             'files[0]': (file_name, output_bytes.getvalue()),
-            'payload_json': (None, json.dumps(response), 'application/json')
+            'payload_json': (None, json.dumps(body), 'application/json')
         }
-        print(response)
-        api_url = f'https://discord.com/api/v9/interactions/{request.json["id"]}/{request.json["token"]}/callback'
-        api_response = requests.post(api_url, files=files)
-        try:
-           print(api_response.json())
-        except:
-            print(api_response.text)
+        api_response = requests.patch(api_url, files=files)
+        return jsonify({ 'status': api_response.status_code }), 200
 
-        return api_response.text, api_response.status_code
+    # Unknown command
     else:
-        return jsonify(response)
-
+        return jsonify({}), 400
   
 @app.route('/')
 def index():
   return 'Hello world'
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=8080, debug=os.getenv('DEBUG', False))
+    app.run(host="0.0.0.0", port=8080, debug=os.getenv('DEBUG') == 'True')
