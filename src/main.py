@@ -80,7 +80,8 @@ def interactions():
             'allowed_mentions': {
                 'parse': []
             },
-            'attachments': [{ 'id': 0, 'filename': file_name, 'description': f'A gif of a hand patting the avatar of Discord user {resolved_user["global_name"]} ({resolved_user["username"]})' }]
+            'attachments': [{ 'id': 0, 'filename': file_name, 'description': f'A gif of a hand patting the avatar of Discord user {resolved_user["global_name"]} ({resolved_user["username"]})' }],
+            'flags': 64 if options.get('ephemeral') is True else 0
         }
         files = {
             'files[0]': (file_name, output_bytes.getvalue()),
