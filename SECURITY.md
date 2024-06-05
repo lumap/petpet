@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-Only one version of this bot exists at a time. The currently deployed version is the only one supported?
+Only one version of this bot exists at a time. The currently deployed version is the only one supported.
 
 ## Reporting a Vulnerability
 
