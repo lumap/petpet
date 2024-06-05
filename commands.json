@@ -1,0 +1,20 @@
+[
+    {
+        "name": "hello",
+        "description": "Makes sure the bot works",
+        "integration_types": [0,1]
+    },
+    {
+        "name": "petpet",
+        "description": "This is probably why you're using this bot.",
+        "integration_types": [0,1],
+        "options": [
+            {
+                "type": 6,
+                "name": "user",
+                "description": "The user to petpet",
+                "required": true
+            }
+        ]
+    }
+]
