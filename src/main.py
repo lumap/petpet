@@ -109,14 +109,11 @@ def interactions():
         file_name = 'petpet.gif'
         api_url = f'https://discord.com/api/v9/webhooks/{APPLICATION_ID}/{interaction_token}/messages/@original'
         body = {
-            'type': InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            'data': {
-                'content': f'<@{author_id}> has pet <@{user_id}>',
-                'allowed_mentions': {
-                    'parse': []
-                },
-                'attachments': [{ 'id': 0, 'filename': file_name, 'description': f'A gif of a hand patting the avatar of Discord user {resolved_user["global_name"]} ({resolved_user["username"]})' }],
-            }
+            'content': f'<@{author_id}> has pet <@{user_id}>',
+            'allowed_mentions': {
+                'parse': []
+            },
+            'attachments': [{ 'id': 0, 'filename': file_name, 'description': f'A gif of a hand patting the avatar of Discord user {resolved_user["global_name"]} ({resolved_user["username"]})' }],
         }
         files = {
             'files[0]': (file_name, output_bytes.getvalue()),
