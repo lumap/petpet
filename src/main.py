@@ -1,6 +1,6 @@
 import dotenv
-dotenv.load_dotenv()
 dotenv.load_dotenv(dotenv.find_dotenv(filename='.env.dev'))
+dotenv.load_dotenv(dotenv.find_dotenv(filename='.env.prod'))
 
 import os
 from flask import Flask, request, jsonify, g
