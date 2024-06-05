@@ -120,6 +120,9 @@ def interactions():
             'payload_json': (None, json.dumps(body), 'application/json')
         }
         api_response = requests.patch(api_url, files=files)
+        
+        del avatar_bytes
+        del output_bytes
         return jsonify({ 'status': api_response.status_code }), 200
 
     # Unknown command
