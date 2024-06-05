@@ -19,10 +19,10 @@ def register_commands(json_path: str, bot_token: str, client_id: str):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Register commands to Discord API')
-    parser.add_argument('json_path', type=str, help='Path to the JSON file containing the commands', required=True)
-    parser.add_argument('--bot-token', type=str, help='Bot token for authentication', required=True)
-    parser.add_argument('--client-id', type=str, help='Client ID for the application', required=True)
+    parser.add_argument('--json', '-j', type=str, help='Path to the JSON file containing the commands', required=True)
+    parser.add_argument('--bot-token', '-t', type=str, help='Bot token for authentication', required=True)
+    parser.add_argument('--client-id', '-i', type=str, help='Client ID for the application', required=True)
     
     args = parser.parse_args()
 
-    register_commands(args.json_path, args.bot_token, args.client_id)
+    register_commands(args.json, args.bot_token, args.client_id)
