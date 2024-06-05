@@ -51,7 +51,10 @@ def interactions():
             author_id = request.json['member']['user']['id']
         elif request.json['user']:
             author_id = request.json['user']['id']
-        user_id = data['options'][0]['value']
+
+        options = {option['name']: option['value'] for option in data['options']}
+
+        user_id = options['user']
         avatar_url = None
         resolved_user = data['resolved']['users'][user_id]
         if data['resolved'].get('members') and data['resolved']['members'].get(user_id) and (data['resolved']['members'][user_id]['avatar'] is not None):
@@ -62,6 +65,13 @@ def interactions():
             avatar_url = f'https://cdn.discordapp.com/avatars/{user_id}/{avatar_hash}.png?size=1024'
         avatar_bytes = file_url_to_bytesio(avatar_url)
         output_bytes = BytesIO()
+
+        if options.get("resolution"):
+            petpet.resolution = (options["resolution"], options["resolution"])
+        if options.get("frame_delay"):
+            petpet.delay = options["frame_delay"]
+        if options.get("frame_count"):
+            petpet.frames = options["frame_count"]
         petpet.make(avatar_bytes, output_bytes)
         
         file_name = 'petpet.gif'

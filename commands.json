@@ -1,0 +1,58 @@
+[
+    {
+        "name": "hello",
+        "description": "Makes sure the bot works",
+        "integration_types": [0,1],
+        "contexts": [0,1,2]
+    },
+    {
+        "name": "petpet",
+        "description": "This is probably why you're using this bot.",
+        "integration_types": [0,1],
+        "contexts": [0,1,2],
+        "options": [
+            {
+                "type": 6,
+                "name": "user",
+                "description": "The user to petpet",
+                "required": true
+            },
+            {
+                "type": 4,
+                "name": "resolution",
+                "description": "The resolution of the gif (default is 128x128)",
+                "required": false,
+                "choices": [
+                    {
+                        "name": "128x128",
+                        "value": 128
+                    },
+                    {
+                        "name": "256x256",
+                        "value": 256
+                    },
+                    {
+                        "name": "512x512",
+                        "value": 512
+                    },
+                    {
+                        "name": "1024x1024",
+                        "value": 1024
+                    }
+                ]
+            },
+            {
+                "type": 4,
+                "name": "frame_delay",
+                "description": "The delay between frames in milliseconds (default is 20)",
+                "required": false
+            },
+            {
+                "type": 4,
+                "name": "frame_count",
+                "description": "The number of frames to generate (default is 10)",
+                "required": false
+            }
+        ]
+    }
+]

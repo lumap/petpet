@@ -5,6 +5,7 @@ dotenv.load_dotenv(dotenv.find_dotenv(filename='.env.dev'))
 
 import requests
 import os
+import argparse
 
 def register_commands(json_path: str, bot_token: str, client_id: str, guild_id: str = None):
     headers = {
@@ -23,4 +24,9 @@ def register_commands(json_path: str, bot_token: str, client_id: str, guild_id: 
             print(response.text)
 
 if __name__ == '__main__':
-    register_commands('commands/commands.json', os.getenv('BOT_TOKEN'), os.getenv('CLIENT_ID'), os.getenv('GUILD_ID'))
+    parser = argparse.ArgumentParser(description='Register commands to Discord API')
+    parser.add_argument('json_path', type=str, help='Path to the JSON file containing the commands')
+
+    args = parser.parse_args()
+    json_path = args.json_path
+    register_commands(json_path, os.getenv('BOT_TOKEN'), os.getenv('CLIENT_ID'), os.getenv('GUILD_ID'))
