@@ -3,12 +3,14 @@ dotenv.load_dotenv()
 dotenv.load_dotenv(dotenv.find_dotenv(filename='.env.dev'))
 
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, g
 from discord_interactions import verify_key_decorator, InteractionType, InteractionResponseType
 from petpetgif import petpet
 import requests
 from io import BytesIO
 import json
+import uuid
+import time
 
 CLIENT_PUBLIC_KEY = os.getenv('CLIENT_PUBLIC_KEY')
 
@@ -19,6 +21,14 @@ def file_url_to_bytesio(file_url):
     return file_bytes
 
 app = Flask(__name__)
+
+@app.before_request
+def before_request_func():
+    execution_id = uuid.uuid4()
+    g.start_time = time.time()
+    g.execution_id = execution_id
+
+    print(g.execution_id, "ROUTE CALLED ", request.url)
 
 @app.route('/interactions', methods=['POST'])
 @verify_key_decorator(CLIENT_PUBLIC_KEY)
@@ -84,4 +94,4 @@ def index():
   return 'Hello world'
 
 if __name__ == '__main__':
-    app.run(port=8080, debug=os.getenv('DEBUG', False))
+    app.run(host="0.0.0.0", port=8080, debug=os.getenv('DEBUG', False))
