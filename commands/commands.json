@@ -2,12 +2,14 @@
     {
         "name": "hello",
         "description": "Makes sure the bot works",
-        "integration_types": [0,1]
+        "integration_types": [0,1],
+        "contexts": [0,1,2]
     },
     {
         "name": "petpet",
         "description": "This is probably why you're using this bot.",
         "integration_types": [0,1],
+        "contexts": [0,1,2],
         "options": [
             {
                 "type": 6,

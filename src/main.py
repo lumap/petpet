@@ -54,7 +54,7 @@ def interactions():
         user_id = data['options'][0]['value']
         avatar_url = None
         resolved_user = data['resolved']['users'][user_id]
-        if data['resolved']['members'].get(user_id) and (data['resolved']['members'][user_id]['avatar'] is not None):
+        if data['resolved'].get('members') and data['resolved']['members'].get(user_id) and (data['resolved']['members'][user_id]['avatar'] is not None):
             avatar_hash = data['resolved']['members'][user_id]['avatar']
             avatar_url = f'https://cdn.discordapp.com/guilds/{request.json['guild_id']}/users/{user_id}/avatars/{avatar_hash}.png?size=1024'
         else:

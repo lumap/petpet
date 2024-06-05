@@ -1,3 +1,5 @@
+#!.venv/bin/python3
+
 import dotenv
 dotenv.load_dotenv(dotenv.find_dotenv(filename='.env.dev'))
 
@@ -21,4 +23,4 @@ def register_commands(json_path: str, bot_token: str, client_id: str, guild_id: 
             print(response.text)
 
 if __name__ == '__main__':
-    register_commands('commands.json', os.getenv('BOT_TOKEN'), os.getenv('CLIENT_ID'), os.getenv('GUILD_ID'))
+    register_commands('commands/commands.json', os.getenv('BOT_TOKEN'), os.getenv('CLIENT_ID'), os.getenv('GUILD_ID'))
