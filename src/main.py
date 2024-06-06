@@ -100,6 +100,8 @@ def interactions():
         output_bytes = BytesIO()
 
         petpet.make(avatar_bytes, output_bytes)
+        
+        petpet.resolution = (128,128)
 
         # Send the petpet gif
         file_name = 'petpet.gif'
