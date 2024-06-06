@@ -1,36 +1,119 @@
 [
     {
+        "type": 1,
         "name": "hello",
         "description": "Makes sure the bot works",
         "integration_types": [0,1],
         "contexts": [0,1,2]
     },
     {
+        "type": 1,
         "name": "petpet",
         "description": "This is probably why you're using this bot.",
         "integration_types": [0,1],
         "contexts": [0,1,2],
         "options": [
             {
-                "type": 6,
+                "type": 1,
                 "name": "user",
-                "description": "The user to petpet",
-                "required": true
+                "description": "PetPet someone's avatar",
+                "options": [
+                    {
+                        "type": 6,
+                        "name": "user",
+                        "description": "The user to petpet",
+                        "required": true
+                    },
+                    {
+                        "type": 4,
+                        "name": "resolution",
+                        "description": "The resolution of the gif (default is 128x128)",
+                        "required": false,
+                        "min_value": 8,
+                        "max_value": 1024
+                    },
+                    {
+                        "type": 5,
+                        "name": "ephemeral",
+                        "description": "Whether or not to make the message ephemeral (default is false)",
+                        "required": false
+                    },
+                    {
+                        "type": 5,
+                        "name": "use_server_avatar",
+                        "description": "Whether or not to use the member's server avatar, if any (default is true)",
+                        "required": false
+                    }
+                ]
             },
             {
-                "type": 4,
-                "name": "resolution",
-                "description": "The resolution of the gif (default is 128x128)",
-                "required": false,
-                "min_value": 8,
-                "max_value": 1024
+                "type": 1,
+                "name": "image_via_url",
+                "description": "PetPet an image via URL",
+                "options": [
+                    {
+                        "type": 3,
+                        "name": "image_url",
+                        "description": "The URL of the image to petpet",
+                        "required": true
+                    },
+                    {
+                        "type": 4,
+                        "name": "resolution",
+                        "description": "The resolution of the gif (default is 128x128)",
+                        "required": false,
+                        "min_value": 8,
+                        "max_value": 1024
+                    },
+                    {
+                        "type": 5,
+                        "name": "ephemeral",
+                        "description": "Whether or not to make the message ephemeral (default is false)",
+                        "required": false
+                    }
+                ]
             },
             {
-                "type": 5,
-                "name": "ephemeral",
-                "description": "Whether or not to make the message ephemeral (default is false)",
-                "required": false
+                "type": 1,
+                "name": "image_via_upload",
+                "description": "PetPet an image via upload",
+                "options": [
+                    {
+                        "type": 11,
+                        "name": "image_upload",
+                        "description": "The image to petpet",
+                        "required": true
+                    },
+                    {
+                        "type": 4,
+                        "name": "resolution",
+                        "description": "The resolution of the gif (default is 128x128)",
+                        "required": false,
+                        "min_value": 8,
+                        "max_value": 1024
+                    },
+                    {
+                        "type": 5,
+                        "name": "ephemeral",
+                        "description": "Whether or not to make the message ephemeral (default is false)",
+                        "required": false
+                    }
+                ]
             }
         ]
+    },
+    {
+        "type": 2,
+        "name": "PetPet this user",
+        "description": "",
+        "integration_types": [0,1],
+        "contexts": [0,1,2]
+    },
+    {
+        "type": 3,
+        "name": "PetPet this message's author",
+        "description": "",
+        "integration_types": [0,1],
+        "contexts": [0,1,2]
     }
 ]

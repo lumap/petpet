@@ -1,25 +1,27 @@
-import dotenv
-dotenv.load_dotenv(dotenv.find_dotenv(filename='.env.dev'))
-dotenv.load_dotenv(dotenv.find_dotenv(filename='.env.prod'))
-
+from mimetypes import guess_type
 import os
+from pydoc import resolve
+from re import I
+import re
+import dotenv
+
+from utils.interactions import defer_interaction, finish_interaction, reply_early_to_interaction
+from utils.make_petpet_gif import make_petpet_gif
+if os.path.isfile(".env.dev"):
+    dotenv.load_dotenv(dotenv.find_dotenv(filename='.env.dev'))
+else:
+    dotenv.load_dotenv(dotenv.find_dotenv(filename='.env.prod'))
+
 from flask import Flask, request, jsonify, g
 from discord_interactions import verify_key_decorator, InteractionType, InteractionResponseType
-from petpetgif import petpet
-import requests
-from io import BytesIO
-import json
 import uuid
 import time
 
+
 CLIENT_PUBLIC_KEY = os.getenv('CLIENT_PUBLIC_KEY')
 APPLICATION_ID = os.getenv('APPLICATION_ID')
-
-def file_url_to_bytesio(file_url):
-    response = requests.get(file_url)
-    response.raise_for_status()  # Check if the request was successful
-    file_bytes = BytesIO(response.content)
-    return file_bytes
+if not CLIENT_PUBLIC_KEY or not APPLICATION_ID:
+    raise Exception("CLIENT_PUBLIC_KEY or APPLICATION_ID not found in .env file")
 
 app = Flask(__name__)
 
@@ -41,6 +43,7 @@ def interactions():
         return jsonify({}), 400
     
     # Prepare response
+    command_type = request.json['type']
     data = request.json['data']
     name = data['name']
     
@@ -56,31 +59,137 @@ def interactions():
     
     # Petpet command
     elif name == 'petpet':
-        # Fetching options
-        options = {option['name']: option['value'] for option in data['options']}
+        
+        # Divide code into subcommands
+        subcommand = data['options'][0]
+        options = {option['name']: option['value'] for option in subcommand['options']}
+        
+        # user 
+        if subcommand['name'] == 'user':
+            
+            # Acknowledge the interaction
+            interaction_id = request.json['id']
+            interaction_token = request.json['token']
 
+            defer_interaction(id=interaction_id, token=interaction_token, ephemeral=options.get('ephemeral', False))
+
+            # Get petpet user
+            user_id = options['user']
+            avatar_url = None
+            resolved_user = data['resolved']['users'][user_id]
+
+            # Get avatar url of petpet user
+            if data['resolved'].get('members') and data['resolved']['members'].get(user_id) and (data['resolved']['members'][user_id]['avatar'] is not None) and (options.get("use_server_avatar", True)):
+                avatar_hash = data['resolved']['members'][user_id]['avatar']
+                avatar_url = f'https://cdn.discordapp.com/guilds/{request.json['guild_id']}/users/{user_id}/avatars/{avatar_hash}.png?size=1024'
+            else:
+                avatar_hash = resolved_user['avatar']
+                if avatar_hash:
+                    avatar_url = f'https://cdn.discordapp.com/avatars/{user_id}/{avatar_hash}.png?size=1024'
+                else:
+                    discrim = resolved_user.get('discriminator')
+                    index = ((int(user_id) >> 22) % 6) if discrim is None else (int(discrim) % 5)
+                    avatar_url = f'https://cdn.discordapp.com/embed/avatars/{index}.png'
+
+            petpet = make_petpet_gif(url=avatar_url, resolution=options.get("resolution", 128))
+            
+            # Send the petpet gif
+
+            author_id = None
+            if request.json.get('member'):
+                author_id = request.json['member']['user']['id']
+            elif request.json['user']:
+                author_id = request.json['user']['id']
+            
+            attachment_alt_text = f'A gif of a hand patting the avatar of Discord user {resolved_user["global_name"]} ({resolved_user["username"]})'
+            msg_content = f'<@{author_id}> has pet <@{user_id}>'
+            
+            status_code = finish_interaction(petpet=petpet, token=interaction_token, msg_content=msg_content, attachment_alt_text=attachment_alt_text, app_id=APPLICATION_ID)
+
+            return jsonify({ 'status': status_code }), 200
+        
+        # image_via_url
+        elif subcommand['name'] == 'image_via_url':
+            
+            # Acknowledge the interaction
+            interaction_id = request.json['id']
+            interaction_token = request.json['token']
+
+            url = options['image_url']
+            guessed_type = guess_type(url)[0]
+            if not guessed_type or guessed_type.split('/')[0] != 'image':
+                reply_early_to_interaction(id=interaction_id, token=interaction_token, content="The provided URL is not an image.")
+                return jsonify({}), 400
+
+            defer_interaction(id=interaction_id, token=interaction_token, ephemeral=options.get('ephemeral', False))
+            
+            # Generate the gif
+            petpet = make_petpet_gif(url=url, resolution=options.get("resolution", 128))
+            
+            # Send the petpet gif
+
+            author_id = None
+            if request.json.get('member'):
+                author_id = request.json['member']['user']['id']
+            elif request.json['user']:
+                author_id = request.json['user']['id']
+            
+            attachment_alt_text = f'A gif of a hand patting the avatar of a user via URL'
+            msg_content = f'<@{author_id}> has pet an image via URL'
+            
+            status_code = finish_interaction(petpet=petpet, token=interaction_token, msg_content=msg_content, attachment_alt_text=attachment_alt_text, app_id=APPLICATION_ID)
+
+            return jsonify({ 'status': status_code }), 200
+        
+        # image_via_upload
+        elif subcommand['name'] == 'image_via_upload':
+            
+            # Acknowledge the interaction
+            interaction_id = request.json['id']
+            interaction_token = request.json['token']
+            
+            image_id = options['image_upload']
+            image = data['resolved']['attachments'][image_id]
+            
+            if not image["content_type"].startswith("image/"):
+                reply_early_to_interaction(id=interaction_id, token=interaction_token, content="The uploaded file is not an image.")
+                return jsonify({}), 400
+            
+            defer_interaction(id=interaction_id, token=interaction_token, ephemeral=options.get('ephemeral', False))
+
+            # Get petpet user
+            url = image['url']
+            petpet = make_petpet_gif(url=url, resolution=options.get("resolution", 128))
+            
+            # Send the petpet gif
+
+            author_id = None
+            if request.json.get('member'):
+                author_id = request.json['member']['user']['id']
+            elif request.json['user']:
+                author_id = request.json['user']['id']
+            
+            attachment_alt_text = f'A gif of a hand patting the avatar of a user via upload'
+            msg_content = f'<@{author_id}> has pet an image via upload'
+            
+            status_code = finish_interaction(petpet=petpet, token=interaction_token, msg_content=msg_content, attachment_alt_text=attachment_alt_text, app_id=APPLICATION_ID)
+
+            return jsonify({ 'status': status_code }), 200
+
+        # Unknown subcommand
+        else:
+            return jsonify({}), 400
+
+    # petpet user command
+    elif name == 'PetPet this user':
         # Acknowledge the interaction
         interaction_id = request.json['id']
         interaction_token = request.json['token']
 
-        api_url = f'https://discord.com/api/v9/interactions/{interaction_id}/{interaction_token}/callback'
-        body = {
-            'type': InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
-            'data': {
-                'flags': 64 if options.get('ephemeral') is True else 0
-            }
-        }
-        response = requests.post(api_url, json=body)
-
-        # Get author id
-        author_id = None
-        if request.json.get('member'):
-            author_id = request.json['member']['user']['id']
-        elif request.json['user']:
-            author_id = request.json['user']['id']
+        defer_interaction(id=interaction_id, token=interaction_token)
 
         # Get petpet user
-        user_id = options['user']
+        user_id = data['target_id']
         avatar_url = None
         resolved_user = data['resolved']['users'][user_id]
 
@@ -90,40 +199,79 @@ def interactions():
             avatar_url = f'https://cdn.discordapp.com/guilds/{request.json['guild_id']}/users/{user_id}/avatars/{avatar_hash}.png?size=1024'
         else:
             avatar_hash = resolved_user['avatar']
-            avatar_url = f'https://cdn.discordapp.com/avatars/{user_id}/{avatar_hash}.png?size=1024'
-            
-        # Generate petpet gif
-        if options.get("resolution"):
-            petpet.resolution = (options["resolution"], options["resolution"])
+            if avatar_hash:
+                avatar_url = f'https://cdn.discordapp.com/avatars/{user_id}/{avatar_hash}.png?size=1024'
+            else:
+                discrim = resolved_user.get('discriminator')
+                index = ((int(user_id) >> 22) % 6) if discrim is None else (int(discrim) % 5)
+                avatar_url = f'https://cdn.discordapp.com/embed/avatars/{index}.png'
 
-        avatar_bytes = file_url_to_bytesio(avatar_url)
-        output_bytes = BytesIO()
-
-        petpet.make(avatar_bytes, output_bytes)
+        petpet = make_petpet_gif(url=avatar_url)
         
-        petpet.resolution = (128,128)
-
         # Send the petpet gif
-        file_name = 'petpet.gif'
-        api_url = f'https://discord.com/api/v9/webhooks/{APPLICATION_ID}/{interaction_token}/messages/@original'
-        body = {
-            'content': f'<@{author_id}> has pet <@{user_id}>',
-            'allowed_mentions': {
-                'parse': []
-            },
-            'attachments': [{ 'id': 0, 'filename': file_name, 'description': f'A gif of a hand patting the avatar of Discord user {resolved_user["global_name"]} ({resolved_user["username"]})' }],
-        }
-        files = {
-            'files[0]': (file_name, output_bytes.getvalue()),
-            'payload_json': (None, json.dumps(body), 'application/json')
-        }
-        api_response = requests.patch(api_url, files=files)
-        
-        del avatar_bytes
-        del output_bytes
-        return jsonify({ 'status': api_response.status_code }), 200
 
-    # Unknown command
+        author_id = None
+        if request.json.get('member'):
+            author_id = request.json['member']['user']['id']
+        elif request.json['user']:
+            author_id = request.json['user']['id']
+        
+        attachment_alt_text = f'A gif of a hand patting the avatar of Discord user {resolved_user["global_name"]} ({resolved_user["username"]})'
+        msg_content = f'<@{author_id}> has pet <@{user_id}>'
+        
+        status_code = finish_interaction(petpet=petpet, token=interaction_token, msg_content=msg_content, attachment_alt_text=attachment_alt_text, app_id=APPLICATION_ID)
+
+        return jsonify({ 'status': status_code }), 200
+    
+    # petpet message command
+    elif name == 'PetPet this message\'s author':
+        
+        # Acknowledge the interaction
+        interaction_id = request.json['id']
+        interaction_token = request.json['token']
+        
+        defer_interaction(id=interaction_id, token=interaction_token)
+        
+        # Get message author
+        message_target_id = data['target_id']
+        resolved_user = data['resolved']['messages'][message_target_id]['author']
+        
+        # get petpet user
+        user_id = resolved_user['id']
+        avatar_url = None
+
+        # Get avatar url of petpet user
+        if data['resolved'].get('members') and data['resolved']['members'].get(user_id) and (data['resolved']['members'][user_id]['avatar'] is not None):
+            avatar_hash = data['resolved']['members'][user_id]['avatar']
+            avatar_url = f'https://cdn.discordapp.com/guilds/{request.json['guild_id']}/users/{user_id}/avatars/{avatar_hash}.png?size=1024'
+        else:
+            avatar_hash = resolved_user['avatar']
+            if avatar_hash:
+                avatar_url = f'https://cdn.discordapp.com/avatars/{user_id}/{avatar_hash}.png?size=1024'
+            else:
+                discrim = resolved_user.get('discriminator')
+                index = ((int(user_id) >> 22) % 6) if discrim is None else (int(discrim) % 5)
+                avatar_url = f'https://cdn.discordapp.com/embed/avatars/{index}.png'
+
+        petpet = make_petpet_gif(url=avatar_url)
+        
+        # Send the petpet gif
+
+        author_id = None
+        if request.json.get('member'):
+            author_id = request.json['member']['user']['id']
+        elif request.json['user']:
+            author_id = request.json['user']['id']
+        
+        attachment_alt_text = f'A gif of a hand patting the avatar of Discord user {resolved_user["global_name"]} ({resolved_user["username"]})'
+        msg_content = f'<@{author_id}> has pet <@{user_id}>'
+        
+        status_code = finish_interaction(petpet=petpet, token=interaction_token, msg_content=msg_content, attachment_alt_text=attachment_alt_text, app_id=APPLICATION_ID)
+
+        return jsonify({ 'status': status_code }), 200
+        return jsonify({}), 200
+    
+    # Unknown command type
     else:
         return jsonify({}), 400
   
