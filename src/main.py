@@ -95,10 +95,6 @@ def interactions():
         # Generate petpet gif
         if options.get("resolution"):
             petpet.resolution = (options["resolution"], options["resolution"])
-        if options.get("frame_delay"):
-            petpet.delay = options["frame_delay"]
-        if options.get("frame_count"):
-            petpet.frames = options["frame_count"]
 
         avatar_bytes = file_url_to_bytesio(avatar_url)
         output_bytes = BytesIO()

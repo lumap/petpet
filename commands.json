@@ -26,18 +26,6 @@
                 "max_value": 1024
             },
             {
-                "type": 4,
-                "name": "frame_delay",
-                "description": "The delay between frames in milliseconds (default is 20)",
-                "required": false
-            },
-            {
-                "type": 4,
-                "name": "frame_count",
-                "description": "The number of frames to generate (default is 10)",
-                "required": false
-            },
-            {
                 "type": 5,
                 "name": "ephemeral",
                 "description": "Whether or not to make the message ephemeral (default is false)",
