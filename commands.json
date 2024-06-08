@@ -1,8 +1,8 @@
 [
     {
         "type": 1,
-        "name": "hello",
-        "description": "Makes sure the bot works",
+        "name": "meow",
+        "description": "Meow?",
         "integration_types": [0,1],
         "contexts": [0,1,2]
     },

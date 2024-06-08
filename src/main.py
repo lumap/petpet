@@ -1,8 +1,5 @@
 from mimetypes import guess_type
 import os
-from pydoc import resolve
-from re import I
-import re
 import dotenv
 
 from utils.interactions import defer_interaction, finish_interaction, reply_early_to_interaction
@@ -20,8 +17,6 @@ import time
 
 CLIENT_PUBLIC_KEY = os.getenv('CLIENT_PUBLIC_KEY')
 APPLICATION_ID = os.getenv('APPLICATION_ID')
-if not CLIENT_PUBLIC_KEY or not APPLICATION_ID:
-    raise Exception("CLIENT_PUBLIC_KEY or APPLICATION_ID not found in .env file")
 
 app = Flask(__name__)
 
@@ -36,6 +31,10 @@ def before_request_func():
 @app.route('/interactions', methods=['POST'])
 @verify_key_decorator(CLIENT_PUBLIC_KEY)
 def interactions():
+    # Python type checking can be stoopid
+    if not APPLICATION_ID:
+        return jsonify({}), 500
+    
     # Check if request is even valid
     if not request.json:
         return jsonify({}), 400
@@ -48,11 +47,11 @@ def interactions():
     name = data['name']
     
     # Hello command
-    if name == 'hello':
+    if name == 'meow':
         response = {
             'type': InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
             'data': {
-                'content': 'Hello, world!'
+                'content': 'Meow, meow meow~!'
             }
         }
         return jsonify(response), 200
