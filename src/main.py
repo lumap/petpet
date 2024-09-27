@@ -42,7 +42,6 @@ def interactions():
         return jsonify({}), 400
     
     # Prepare response
-    command_type = request.json['type']
     data = request.json['data']
     name = data['name']
     
@@ -100,7 +99,7 @@ def interactions():
             elif request.json['user']:
                 author_id = request.json['user']['id']
             
-            attachment_alt_text = f'A gif of a hand patting the avatar of Discord user {resolved_user["global_name"]} ({resolved_user["username"]})'
+            attachment_alt_text = f'A gif of a hand patting the avatar of Discord user { f"{resolved_user["global_name"]} ({resolved_user["username"]})" if resolved_user.get("global_name") else resolved_user["username"] }'
             msg_content = f'<@{author_id}> has pet <@{user_id}>'
             
             status_code = finish_interaction(petpet=petpet, token=interaction_token, msg_content=msg_content, attachment_alt_text=attachment_alt_text, app_id=APPLICATION_ID)
