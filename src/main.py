@@ -116,7 +116,7 @@ def interactions():
             url = options['image_url']
             guessed_type = guess_type(url)[0]
             if not guessed_type or guessed_type.split('/')[0] != 'image':
-                reply_early_to_interaction(id=interaction_id, token=interaction_token, content="The provided URL is not an image.")
+                reply_early_to_interaction(id=interaction_id, token=interaction_token, content="The provided URL is invalid (if it's a .webp, please use another file extension).")
                 return jsonify({}), 400
 
             defer_interaction(id=interaction_id, token=interaction_token, ephemeral=options.get('ephemeral', False))
