@@ -2,7 +2,7 @@ from mimetypes import guess_type
 import os
 import dotenv
 
-from utils.interactions import defer_interaction, finish_interaction, reply_early_to_interaction
+from utils.interactions import defer_interaction, finish_interaction, finish_interaction_upload_img, reply_early_to_interaction
 from utils.make_petpet_gif import make_petpet_gif
 from utils.get_image_from_url import get_image_from_url
 
@@ -91,13 +91,13 @@ def interactions():
                     avatar_url = f'https://cdn.discordapp.com/embed/avatars/{index}.png'
                     
             # Get image
+            defer_interaction(id=interaction_id, token=interaction_token, ephemeral=options.get('ephemeral', False))
+            
+            
             image_bytes = get_image_from_url(avatar_url)
             if image_bytes is False:
-                reply_early_to_interaction(id=interaction_id, token=interaction_token, content="There was an error fetching the image. Please try again.")
+                finish_interaction(token=interaction_token, msg_content="There was an error fetching the image. Please try again.", app_id=APPLICATION_ID)
                 return jsonify({}), 400
-            
-            # Turn it into petpet
-            defer_interaction(id=interaction_id, token=interaction_token, ephemeral=options.get('ephemeral', False))
             
             petpet = make_petpet_gif(bytes=image_bytes, resolution=options.get("resolution", 128))
             
@@ -111,7 +111,7 @@ def interactions():
             attachment_alt_text = f'A gif of a hand patting the avatar of Discord user { f"{resolved_user["global_name"]} ({resolved_user["username"]})" if resolved_user.get("global_name") else resolved_user["username"] }'
             msg_content = f'<@{author_id}> has pet <@{user_id}>'
             
-            status_code = finish_interaction(petpet=petpet, token=interaction_token, msg_content=msg_content, attachment_alt_text=attachment_alt_text, app_id=APPLICATION_ID)
+            status_code = finish_interaction_upload_img(petpet=petpet, token=interaction_token, msg_content=msg_content, attachment_alt_text=attachment_alt_text, app_id=APPLICATION_ID)
 
             return jsonify({ 'status': status_code }), 200
         
@@ -129,13 +129,12 @@ def interactions():
                 return jsonify({}), 400
             
             # Get image
+            defer_interaction(id=interaction_id, token=interaction_token, ephemeral=options.get('ephemeral', False))
+            
             image_bytes = get_image_from_url(url)
             if image_bytes is False:
-                reply_early_to_interaction(id=interaction_id, token=interaction_token, content="There was an error fetching the image. Please try again.")
+                finish_interaction(token=interaction_token, msg_content="There was an error fetching the image. Please try again.", app_id=APPLICATION_ID)
                 return jsonify({}), 400
-            
-            # Turn it into petpet
-            defer_interaction(id=interaction_id, token=interaction_token, ephemeral=options.get('ephemeral', False))
             
             petpet = make_petpet_gif(bytes=image_bytes, resolution=options.get("resolution", 128))
             
@@ -149,7 +148,7 @@ def interactions():
             attachment_alt_text = f'A gif of a hand patting the avatar of a user via URL'
             msg_content = f'<@{author_id}> has pet an image via URL'
             
-            status_code = finish_interaction(petpet=petpet, token=interaction_token, msg_content=msg_content, attachment_alt_text=attachment_alt_text, app_id=APPLICATION_ID)
+            status_code = finish_interaction_upload_img(petpet=petpet, token=interaction_token, msg_content=msg_content, attachment_alt_text=attachment_alt_text, app_id=APPLICATION_ID)
 
             return jsonify({ 'status': status_code }), 200
         
@@ -168,14 +167,13 @@ def interactions():
                 return jsonify({}), 400
             
             # Get image
+            defer_interaction(id=interaction_id, token=interaction_token, ephemeral=options.get('ephemeral', False))
+            
             image_bytes = get_image_from_url(image['url'])
             if image_bytes is False:
-                reply_early_to_interaction(id=interaction_id, token=interaction_token, content="There was an error fetching the image. Please try again.")
+                finish_interaction(token=interaction_token, msg_content="There was an error fetching the image. Please try again.", app_id=APPLICATION_ID)
                 return jsonify({}), 400
             
-            # Turn it into petpet         
-            defer_interaction(id=interaction_id, token=interaction_token, ephemeral=options.get('ephemeral', False))
-
             petpet = make_petpet_gif(bytes=image_bytes, resolution=options.get("resolution", 128))
             
             # Send the petpet gif
@@ -188,7 +186,7 @@ def interactions():
             attachment_alt_text = f'A gif of a hand patting the avatar of a user via upload'
             msg_content = f'<@{author_id}> has pet an image via upload'
             
-            status_code = finish_interaction(petpet=petpet, token=interaction_token, msg_content=msg_content, attachment_alt_text=attachment_alt_text, app_id=APPLICATION_ID)
+            status_code = finish_interaction_upload_img(petpet=petpet, token=interaction_token, msg_content=msg_content, attachment_alt_text=attachment_alt_text, app_id=APPLICATION_ID)
 
             return jsonify({ 'status': status_code }), 200
 
@@ -221,14 +219,13 @@ def interactions():
                 avatar_url = f'https://cdn.discordapp.com/embed/avatars/{index}.png'
                 
         # Get image
-        image_bytes = get_image_from_url(avatar_url)
-        if image_bytes is False:
-            reply_early_to_interaction(id=interaction_id, token=interaction_token, content="There was an error fetching the image. Please try again.")
-            return jsonify({}), 400
-    
-        # Turn it into petpet
         defer_interaction(id=interaction_id, token=interaction_token)
 
+        image_bytes = get_image_from_url(avatar_url)
+        if image_bytes is False:
+            finish_interaction(token=interaction_token, msg_content="There was an error fetching the image. Please try again.", app_id=APPLICATION_ID)
+            return jsonify({}), 400
+    
         petpet = make_petpet_gif(bytes=image_bytes)
         
         # Send the petpet gif
@@ -241,7 +238,7 @@ def interactions():
         attachment_alt_text = f'A gif of a hand patting the avatar of Discord user {resolved_user["global_name"]} ({resolved_user["username"]})'
         msg_content = f'<@{author_id}> has pet <@{user_id}>'
         
-        status_code = finish_interaction(petpet=petpet, token=interaction_token, msg_content=msg_content, attachment_alt_text=attachment_alt_text, app_id=APPLICATION_ID)
+        status_code = finish_interaction_upload_img(petpet=petpet, token=interaction_token, msg_content=msg_content, attachment_alt_text=attachment_alt_text, app_id=APPLICATION_ID)
 
         return jsonify({ 'status': status_code }), 200
     
@@ -274,13 +271,12 @@ def interactions():
                 avatar_url = f'https://cdn.discordapp.com/embed/avatars/{index}.png'
                 
         # Get image
+        defer_interaction(id=interaction_id, token=interaction_token)
+        
         image_bytes = get_image_from_url(avatar_url)
         if image_bytes is False:
-            reply_early_to_interaction(id=interaction_id, token=interaction_token, content="There was an error fetching the image. Please try again.")
+            finish_interaction(token=interaction_token, msg_content="There was an error fetching the image. Please try again.", app_id=APPLICATION_ID)
             return jsonify({}), 400
-
-        # Turn it into petpet
-        defer_interaction(id=interaction_id, token=interaction_token)
 
         petpet = make_petpet_gif(bytes=image_bytes)
         
@@ -294,7 +290,7 @@ def interactions():
         attachment_alt_text = f'A gif of a hand patting the avatar of Discord user {resolved_user["global_name"]} ({resolved_user["username"]})'
         msg_content = f'<@{author_id}> has pet <@{user_id}>'
         
-        status_code = finish_interaction(petpet=petpet, token=interaction_token, msg_content=msg_content, attachment_alt_text=attachment_alt_text, app_id=APPLICATION_ID)
+        status_code = finish_interaction_upload_img(petpet=petpet, token=interaction_token, msg_content=msg_content, attachment_alt_text=attachment_alt_text, app_id=APPLICATION_ID)
 
         return jsonify({ 'status': status_code }), 200
         return jsonify({}), 200

@@ -22,8 +22,17 @@ def defer_interaction(id: str, token: str, ephemeral: bool = False) -> None:
         }
     }
     requests.post(api_url, json=body)
-
-def finish_interaction(petpet: bytes, token: str, msg_content: str, attachment_alt_text: str, app_id: str) -> int:
+    
+def finish_interaction(token: str, msg_content: str, app_id: str) -> int:
+    api_url = f'https://discord.com/api/v9/webhooks/{app_id}/{token}/messages/@original'
+    body = {
+        'content': msg_content
+    }
+    api_response = requests.patch(api_url, json=body)
+    return api_response.status_code
+    
+    
+def finish_interaction_upload_img(petpet: bytes, token: str, msg_content: str, attachment_alt_text: str, app_id: str) -> int:
     file_name = 'petpet.gif'
     api_url = f'https://discord.com/api/v9/webhooks/{app_id}/{token}/messages/@original'
     body = {
