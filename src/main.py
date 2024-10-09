@@ -4,6 +4,8 @@ import dotenv
 
 from utils.interactions import defer_interaction, finish_interaction, reply_early_to_interaction
 from utils.make_petpet_gif import make_petpet_gif
+from utils.get_image_from_url import get_image_from_url
+
 if os.path.isfile(".env.dev"):
     dotenv.load_dotenv(dotenv.find_dotenv(filename='.env.dev'))
 else:
@@ -69,7 +71,6 @@ def interactions():
             interaction_id = request.json['id']
             interaction_token = request.json['token']
 
-            defer_interaction(id=interaction_id, token=interaction_token, ephemeral=options.get('ephemeral', False))
 
             # Get petpet user
             user_id = options['user']
@@ -88,11 +89,19 @@ def interactions():
                     discrim = resolved_user.get('discriminator')
                     index = ((int(user_id) >> 22) % 6) if discrim is None else (int(discrim) % 5)
                     avatar_url = f'https://cdn.discordapp.com/embed/avatars/{index}.png'
-
-            petpet = make_petpet_gif(url=avatar_url, resolution=options.get("resolution", 128))
+                    
+            # Get image
+            image_bytes = get_image_from_url(avatar_url)
+            if image_bytes is False:
+                reply_early_to_interaction(id=interaction_id, token=interaction_token, content="There was an error fetching the image. Please try again.")
+                return jsonify({}), 400
+            
+            # Turn it into petpet
+            defer_interaction(id=interaction_id, token=interaction_token, ephemeral=options.get('ephemeral', False))
+            
+            petpet = make_petpet_gif(bytes=image_bytes, resolution=options.get("resolution", 128))
             
             # Send the petpet gif
-
             author_id = None
             if request.json.get('member'):
                 author_id = request.json['member']['user']['id']
@@ -118,14 +127,19 @@ def interactions():
             if not guessed_type or guessed_type.split('/')[0] != 'image':
                 reply_early_to_interaction(id=interaction_id, token=interaction_token, content="The provided URL is invalid (if it's a .webp, please use another file extension).")
                 return jsonify({}), 400
-
+            
+            # Get image
+            image_bytes = get_image_from_url(url)
+            if image_bytes is False:
+                reply_early_to_interaction(id=interaction_id, token=interaction_token, content="There was an error fetching the image. Please try again.")
+                return jsonify({}), 400
+            
+            # Turn it into petpet
             defer_interaction(id=interaction_id, token=interaction_token, ephemeral=options.get('ephemeral', False))
             
-            # Generate the gif
-            petpet = make_petpet_gif(url=url, resolution=options.get("resolution", 128))
+            petpet = make_petpet_gif(bytes=image_bytes, resolution=options.get("resolution", 128))
             
             # Send the petpet gif
-
             author_id = None
             if request.json.get('member'):
                 author_id = request.json['member']['user']['id']
@@ -153,14 +167,18 @@ def interactions():
                 reply_early_to_interaction(id=interaction_id, token=interaction_token, content="The uploaded file is not an image.")
                 return jsonify({}), 400
             
+            # Get image
+            image_bytes = get_image_from_url(image['url'])
+            if image_bytes is False:
+                reply_early_to_interaction(id=interaction_id, token=interaction_token, content="There was an error fetching the image. Please try again.")
+                return jsonify({}), 400
+            
+            # Turn it into petpet         
             defer_interaction(id=interaction_id, token=interaction_token, ephemeral=options.get('ephemeral', False))
 
-            # Get petpet user
-            url = image['url']
-            petpet = make_petpet_gif(url=url, resolution=options.get("resolution", 128))
+            petpet = make_petpet_gif(bytes=image_bytes, resolution=options.get("resolution", 128))
             
             # Send the petpet gif
-
             author_id = None
             if request.json.get('member'):
                 author_id = request.json['member']['user']['id']
@@ -184,8 +202,6 @@ def interactions():
         interaction_id = request.json['id']
         interaction_token = request.json['token']
 
-        defer_interaction(id=interaction_id, token=interaction_token)
-
         # Get petpet user
         user_id = data['target_id']
         avatar_url = None
@@ -203,11 +219,19 @@ def interactions():
                 discrim = resolved_user.get('discriminator')
                 index = ((int(user_id) >> 22) % 6) if discrim is None else (int(discrim) % 5)
                 avatar_url = f'https://cdn.discordapp.com/embed/avatars/{index}.png'
+                
+        # Get image
+        image_bytes = get_image_from_url(avatar_url)
+        if image_bytes is False:
+            reply_early_to_interaction(id=interaction_id, token=interaction_token, content="There was an error fetching the image. Please try again.")
+            return jsonify({}), 400
+    
+        # Turn it into petpet
+        defer_interaction(id=interaction_id, token=interaction_token)
 
-        petpet = make_petpet_gif(url=avatar_url)
+        petpet = make_petpet_gif(bytes=image_bytes)
         
         # Send the petpet gif
-
         author_id = None
         if request.json.get('member'):
             author_id = request.json['member']['user']['id']
@@ -227,9 +251,7 @@ def interactions():
         # Acknowledge the interaction
         interaction_id = request.json['id']
         interaction_token = request.json['token']
-        
-        defer_interaction(id=interaction_id, token=interaction_token)
-        
+                
         # Get message author
         message_target_id = data['target_id']
         resolved_user = data['resolved']['messages'][message_target_id]['author']
@@ -250,11 +272,19 @@ def interactions():
                 discrim = resolved_user.get('discriminator')
                 index = ((int(user_id) >> 22) % 6) if discrim is None else (int(discrim) % 5)
                 avatar_url = f'https://cdn.discordapp.com/embed/avatars/{index}.png'
+                
+        # Get image
+        image_bytes = get_image_from_url(avatar_url)
+        if image_bytes is False:
+            reply_early_to_interaction(id=interaction_id, token=interaction_token, content="There was an error fetching the image. Please try again.")
+            return jsonify({}), 400
 
-        petpet = make_petpet_gif(url=avatar_url)
+        # Turn it into petpet
+        defer_interaction(id=interaction_id, token=interaction_token)
+
+        petpet = make_petpet_gif(bytes=image_bytes)
         
         # Send the petpet gif
-
         author_id = None
         if request.json.get('member'):
             author_id = request.json['member']['user']['id']
