@@ -87,7 +87,8 @@ def interactions():
                     avatar_url = f'https://cdn.discordapp.com/avatars/{user_id}/{avatar_hash}.png?size=1024'
                 else:
                     discrim = resolved_user.get('discriminator')
-                    index = ((int(user_id) >> 22) % 6) if discrim is None else (int(discrim) % 5)
+                    print(discrim)
+                    index = ((int(user_id) >> 22) % 6) if discrim is "0" else (int(discrim) % 5)
                     avatar_url = f'https://cdn.discordapp.com/embed/avatars/{index}.png'
                     
             # Get image
