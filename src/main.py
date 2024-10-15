@@ -1,6 +1,8 @@
-from mimetypes import guess_type
+from mimetypes import guess_type, add_type
 import os
 import dotenv
+
+add_type('image/webp', '.webp')
 
 from utils.interactions import defer_interaction, finish_interaction, finish_interaction_upload_img, reply_early_to_interaction
 from utils.make_petpet_gif import make_petpet_gif
@@ -126,7 +128,7 @@ def interactions():
             url = options['image_url']
             guessed_type = guess_type(url)[0]
             if not guessed_type or guessed_type.split('/')[0] != 'image':
-                reply_early_to_interaction(id=interaction_id, token=interaction_token, content="The provided URL is invalid (if it's a .webp, please use another file extension).")
+                reply_early_to_interaction(id=interaction_id, token=interaction_token, content="The provided URL is invalid.")
                 return jsonify({}), 400
             
             # Get image
