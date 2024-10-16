@@ -1,0 +1,1 @@
+This code originates from the `petpetgif` PyPi module. It has been edited by me to fix bugs and add functionality.
