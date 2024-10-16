@@ -4,9 +4,9 @@ import dotenv
 
 add_type('image/webp', '.webp')
 
-from utils.interactions import defer_interaction, finish_interaction, finish_interaction_upload_img, reply_early_to_interaction
-from utils.make_petpet_gif import make_petpet_gif
-from utils.get_image_from_url import get_image_from_url
+from src.utils.interactions import defer_interaction, finish_interaction, finish_interaction_upload_img, reply_early_to_interaction
+from src.utils.make_petpet_gif import make_petpet_gif
+from src.utils.get_image_from_url import get_image_from_url
 
 if os.path.isfile(".env.dev"):
     dotenv.load_dotenv(dotenv.find_dotenv(filename='.env.dev'))
@@ -90,7 +90,7 @@ def interactions():
                 else:
                     discrim = resolved_user.get('discriminator')
                     print(discrim)
-                    index = ((int(user_id) >> 22) % 6) if discrim is "0" else (int(discrim) % 5)
+                    index = ((int(user_id) >> 22) % 6) if discrim == "0" else (int(discrim) % 5)
                     avatar_url = f'https://cdn.discordapp.com/embed/avatars/{index}.png'
                     
             # Get image
@@ -102,7 +102,7 @@ def interactions():
                 finish_interaction(token=interaction_token, msg_content="There was an error fetching the image. Please try again.", app_id=APPLICATION_ID)
                 return jsonify({}), 400
             
-            petpet = make_petpet_gif(bytes=image_bytes, resolution=options.get("resolution", 128))
+            petpet = make_petpet_gif(bytes=image_bytes, resolution=options.get("resolution", 128), speed=options.get("speed", 1))
             
             # Send the petpet gif
             author_id = None
@@ -139,7 +139,7 @@ def interactions():
                 finish_interaction(token=interaction_token, msg_content="There was an error fetching the image. Please try again.", app_id=APPLICATION_ID)
                 return jsonify({}), 400
             
-            petpet = make_petpet_gif(bytes=image_bytes, resolution=options.get("resolution", 128))
+            petpet = make_petpet_gif(bytes=image_bytes, resolution=options.get("resolution", 128), speed=options.get("speed", 1))
             
             # Send the petpet gif
             author_id = None
@@ -177,7 +177,7 @@ def interactions():
                 finish_interaction(token=interaction_token, msg_content="There was an error fetching the image. Please try again.", app_id=APPLICATION_ID)
                 return jsonify({}), 400
             
-            petpet = make_petpet_gif(bytes=image_bytes, resolution=options.get("resolution", 128))
+            petpet = make_petpet_gif(bytes=image_bytes, resolution=options.get("resolution", 128), speed=options.get("speed", 1))
             
             # Send the petpet gif
             author_id = None
