@@ -1,1 +1,1 @@
-This code originates from the `petpetgif` PyPi module. It has been edited by me to fix bugs and add functionality.
+This code originates from the `pet-pet-gif` PyPi module. It has been edited by me to fix bugs and add functionality.
