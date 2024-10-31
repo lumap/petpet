@@ -4,8 +4,8 @@ from src.pet_gen import petpet
 def convert_speed_to_petpet_delay(speed: int) -> int:
     return int(40 // speed)
 
-def make_petpet_gif(bytes: BytesIO, resolution: int = 128, speed = 1) -> bytes:
-    petpet.resolution = (resolution, resolution)
+def make_petpet_gif(bytes: BytesIO, width = 128, height = 128, speed = 1) -> bytes:
+    petpet.resolution = (width, height)
     petpet.delay = convert_speed_to_petpet_delay(speed)
     
     output_bytes = BytesIO()

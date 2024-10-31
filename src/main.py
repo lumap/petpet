@@ -102,7 +102,7 @@ def interactions():
                 finish_interaction(token=interaction_token, msg_content="There was an error fetching the image. Please try again.", app_id=APPLICATION_ID)
                 return jsonify({}), 400
             
-            petpet = make_petpet_gif(bytes=image_bytes, resolution=options.get("resolution", 128), speed=options.get("speed", 1))
+            petpet = make_petpet_gif(bytes=image_bytes, width=options.get("width", 128), height=options.get("height", 128), speed=options.get("speed", 1))
             
             # Send the petpet gif
             author_id = None
@@ -139,7 +139,7 @@ def interactions():
                 finish_interaction(token=interaction_token, msg_content="There was an error fetching the image. Please try again.", app_id=APPLICATION_ID)
                 return jsonify({}), 400
             
-            petpet = make_petpet_gif(bytes=image_bytes, resolution=options.get("resolution", 128), speed=options.get("speed", 1))
+            petpet = make_petpet_gif(bytes=image_bytes, width=options.get("width", 128), height=options.get("height", 128), speed=options.get("speed", 1))
             
             # Send the petpet gif
             author_id = None
@@ -177,7 +177,7 @@ def interactions():
                 finish_interaction(token=interaction_token, msg_content="There was an error fetching the image. Please try again.", app_id=APPLICATION_ID)
                 return jsonify({}), 400
             
-            petpet = make_petpet_gif(bytes=image_bytes, resolution=options.get("resolution", 128), speed=options.get("speed", 1))
+            petpet = make_petpet_gif(bytes=image_bytes, width=options.get("width", 128), height=options.get("height", 128), speed=options.get("speed", 1))
             
             # Send the petpet gif
             author_id = None
