@@ -22,6 +22,8 @@ import time
 CLIENT_PUBLIC_KEY = os.getenv('CLIENT_PUBLIC_KEY')
 APPLICATION_ID = os.getenv('APPLICATION_ID')
 
+blacklisted_users = ["1118171067463241868"]
+
 app = Flask(__name__)
 
 @app.before_request
@@ -76,6 +78,16 @@ def interactions():
 
             # Get petpet user
             user_id = options['user']
+            
+            if user_id in blacklisted_users:
+                return jsonify({
+                    'type': 4,
+                    'data': {
+                        'content': 'This user is blacklisted.',
+                        'flags': 64
+                    }
+                })
+
             avatar_url = None
             resolved_user = data['resolved']['users'][user_id]
 
@@ -205,6 +217,16 @@ def interactions():
 
         # Get petpet user
         user_id = data['target_id']
+        
+        if user_id in blacklisted_users:
+            return jsonify({
+                'type': 4,
+                'data': {
+                    'content': 'This user is blacklisted.',
+                    'flags': 64
+                }
+            })
+
         avatar_url = None
         resolved_user = data['resolved']['users'][user_id]
 
@@ -258,6 +280,15 @@ def interactions():
         
         # get petpet user
         user_id = resolved_user['id']
+        
+        if user_id in blacklisted_users:
+            return jsonify({
+                'type': 4,
+                'data': {
+                    'content': 'This user is blacklisted.',
+                    'flags': 64
+                }
+            })        
         avatar_url = None
 
         # Get avatar url of petpet user
