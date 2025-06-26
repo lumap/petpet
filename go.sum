@@ -1,0 +1,6 @@
+github.com/amatsagu/tempest v1.2.3 h1:VpbXmhvpytBZkYrmShxEG9mOz/lQ5nj6AoCdzXE+ggc=
+github.com/amatsagu/tempest v1.2.3/go.mod h1:NuRaGM2wOabFv4Z0IDCKkdXQcJ6WrqwVrk2CUPcJbmk=
+github.com/joho/godotenv v1.5.1 h1:7eLL/+HRGLY0ldzfGMeQkb7vMd0as4CfYvUVzLqw0N0=
+github.com/joho/godotenv v1.5.1/go.mod h1:f4LDr5Voq0i2e/R5DDNOoa2zzDfwtkZa6DnEwAbqwq4=
+golang.org/x/image v0.28.0 h1:gdem5JW1OLS4FbkWgLO+7ZeFzYtL3xClb97GaUzYMFE=
+golang.org/x/image v0.28.0/go.mod h1:GUJYXtnGKEUgggyzh+Vxt+AviiCcyiwpsl8iQ8MvwGY=
