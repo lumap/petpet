@@ -1,12 +1,12 @@
 package utils
 
-import "github.com/amatsagu/tempest"
+import "petpet/lib"
 
-var BlacklistedUsers = []tempest.Snowflake {
+var BlacklistedUsers = []lib.Snowflake {
 	1118171067463241868,
 }
 
-var PetpetCommandOptions = []tempest.CommandOption{
+var PetpetCommandOptions = []lib.CommandOption{
 	{
 		Type:        4,
 		Name:        "width",
@@ -39,7 +39,7 @@ var PetpetCommandOptions = []tempest.CommandOption{
 	},
 }
 
-var PetpetCommandUserOptions = []tempest.CommandOption{
+var PetpetCommandUserOptions = []lib.CommandOption{
 	{
 		Type:        6,
 		Name:        "user_to_petpet",

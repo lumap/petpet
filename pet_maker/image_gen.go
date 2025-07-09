@@ -1,15 +1,16 @@
 package pet_maker
 
 import (
+	"bytes"
+	"fmt"
 	"image"
 	"image/color"
 	"image/color/palette"
 	"image/draw"
 	"image/gif"
 	"image/png"
-	"os"
 	"net/http"
-	"fmt"
+	"os"
 
 	xdraw "golang.org/x/image/draw"
 )
@@ -45,12 +46,12 @@ func loadPNG(path string) (image.Image, error) {
 	return img, nil
 }
 
-func main() {
+func MakePetImage(url string, speed float64, width int, height int) *bytes.Reader {
 	const frames = 5
 	var gifFrames []*image.Paletted
 	var delays []int
 
-	baseImg, err := loadPNGFromURL("https://cdn.discordapp.com/avatars/143090142360371200/a73420b217a77a77b17fb42fa7ecfbcc.png?size=4096")
+	baseImg, err := loadPNGFromURL(url)
 	if err != nil {
 		panic(err)
 	}
@@ -59,24 +60,27 @@ func main() {
 	customPalette := make([]color.Color, len(palette.Plan9))
 	copy(customPalette, palette.Plan9)
 	customPalette[0] = color.RGBA{0, 0, 0, 0}
-
-	bounceOffset := []int {0, 70, 140, 90, 50}
+	bounceOffset := []int{0, 3, 6, 4, 2} // based on a 128x28 grid
 
 	for i := range frames {
-		overlayPath := fmt.Sprintf("%d.png", i)
+		overlayPath := fmt.Sprintf("./pet_maker/pet_images/%d.png", i)
 		overlayImg, err := loadPNG(overlayPath)
 		if err != nil {
 			panic(err)
 		}
-
-		rgba := image.NewRGBA(image.Rect(0, 0, 1024, 1024))
+		
+		rgba := image.NewRGBA(image.Rect(0, 0, width, height))
 		draw.Draw(rgba, rgba.Bounds(), &image.Uniform{C: image.Transparent}, image.Point{}, draw.Src)
-
-		baseTargetRect := image.Rect(200, 200 + bounceOffset[i], 1024, 1024)
+		
+		left := int(0.23*float64(width)) - bounceOffset[i]
+		top := int(0.18*float64(height)) + bounceOffset[i]
+		right := int(0.98*float64(width)) + bounceOffset[i]
+		bottom := int(0.94*float64(height))
+		baseTargetRect := image.Rect(left, top, right, bottom)
 		baseSrcRect := baseImg.Bounds()
 		xdraw.CatmullRom.Scale(rgba, baseTargetRect, baseImg, baseSrcRect, draw.Over, nil)
 
-		overlayTargetRect := image.Rect(0, 0, 1024, 1024)
+		overlayTargetRect := image.Rect(0, 0, width, height)
 		overlaySrcRect := overlayImg.Bounds()
 		xdraw.CatmullRom.Scale(rgba, overlayTargetRect, overlayImg, overlaySrcRect, draw.Over, nil)
 
@@ -84,7 +88,7 @@ func main() {
 		draw.FloydSteinberg.Draw(paletted, rgba.Bounds(), rgba, image.Point{})
 
 		gifFrames = append(gifFrames, paletted)
-		delays = append(delays, 5)
+		delays = append(delays, int(5*speed))
 	}
 
 	outGif := &gif.GIF{
@@ -97,16 +101,10 @@ func main() {
 		outGif.Disposal[i] = gif.DisposalBackground
 	}
 
-	outFile, err := os.Create("output.gif")
+	var bufMem bytes.Buffer
+	err = gif.EncodeAll(&bufMem, outGif)
 	if err != nil {
 		panic(err)
 	}
-	defer outFile.Close()
-
-	err = gif.EncodeAll(outFile, outGif)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println("GIF created as output.gif")
+	return bytes.NewReader(bufMem.Bytes())
 }

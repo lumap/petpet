@@ -1,14 +1,14 @@
 package commands
 
 import (
-	tempest "github.com/amatsagu/tempest"
+	"petpet/lib"
 )
 
-var Meow tempest.Command = tempest.Command{
-	Name:        "Meow meow!",
-	Description: "",
-	Type: 2,
-	SlashCommandHandler: func(itx *tempest.CommandInteraction) {
-		itx.SendLinearReply("Meow~ 🐱", true)
+var Meow lib.Command = lib.Command{
+	Name:        "meow",
+	Description: "Meow, meow!",
+	Type: lib.COMMAND_TYPE_CHAT_INPUT,
+	CommandHandler: func(itx *lib.CommandInteraction) {
+		itx.SendSimpleReply("Mrrowww~", false)
 	},
 }
