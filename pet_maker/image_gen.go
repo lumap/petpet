@@ -9,13 +9,14 @@ import (
 	"image/draw"
 	"image/gif"
 	"image/png"
+	_ "golang.org/x/image/webp" // Register WebP format
 	"net/http"
 	"os"
 
 	xdraw "golang.org/x/image/draw"
 )
 
-func loadPNGFromURL(url string) (image.Image, error) {
+func loadImageFromURL(url string) (image.Image, error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
@@ -26,7 +27,7 @@ func loadPNGFromURL(url string) (image.Image, error) {
 		return nil, fmt.Errorf("failed to fetch image: status code %d", resp.StatusCode)
 	}
 
-	img, err := png.Decode(resp.Body)
+	img, _, err := image.Decode(resp.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +52,7 @@ func MakePetImage(url string, speed float64, width int, height int) *bytes.Reade
 	var gifFrames []*image.Paletted
 	var delays []int
 
-	baseImg, err := loadPNGFromURL(url)
+	baseImg, err := loadImageFromURL(url)
 	if err != nil {
 		panic(err)
 	}

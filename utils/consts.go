@@ -53,3 +53,21 @@ var PetpetCommandUserOptions = []lib.CommandOption{
 		Required:    false,
 	},
 }
+
+var PetpetCommandImageURLOptions = []lib.CommandOption{
+	{
+		Type:        3,
+		Name:        "image_url",
+		Description: "The image's URL",
+		Required:    true,
+	},
+}
+
+var PetpetCommandImageUploadOptions = []lib.CommandOption{
+	{
+		Type:        11,
+		Name:        "image_upload",
+		Description: "The image to petpet",
+		Required:    true,
+	},
+}

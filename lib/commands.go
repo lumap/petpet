@@ -8,43 +8,44 @@ import (
 )
 
 type Command struct {
-	Type                     CommandType                  `json:"type,omitempty"`
-	Name                     string                       `json:"name"`
-	Description              string                       `json:"description"`
-	Options                  []CommandOption              `json:"options,omitempty"`
+	Type        CommandType     `json:"type,omitempty"`
+	Name        string          `json:"name"`
+	Description string          `json:"description"`
+	Options     []CommandOption `json:"options,omitempty"`
 
-	CommandHandler func(itx *CommandInteraction)         `json:"-"`
+	CommandHandler func(interaction *CommandInteraction) `json:"-"`
 }
 
 type CommandOption struct {
-	Type                     OptionType          `json:"type"`
-	Name                     string              `json:"name"`
-	Description              string              `json:"description"`
-	Required                 bool                `json:"required,omitempty"`
-	MinValue                 float64             `json:"min_value,omitempty"`
-	MaxValue                 float64             `json:"max_value,omitempty"`
-	MinLength                uint32              `json:"min_length,omitempty"`
-	MaxLength                uint32              `json:"max_length,omitempty"`
-	Options                  []CommandOption     `json:"options,omitempty"`
+	Type        OptionType      `json:"type"`
+	Name        string          `json:"name"`
+	Description string          `json:"description"`
+	Required    bool            `json:"required,omitempty"`
+	MinValue    float64         `json:"min_value,omitempty"`
+	MaxValue    float64         `json:"max_value,omitempty"`
+	MinLength   uint32          `json:"min_length,omitempty"`
+	MaxLength   uint32          `json:"max_length,omitempty"`
+	Options     []CommandOption `json:"options,omitempty"`
 }
 
 type CommandType uint8
+
 const (
-	COMMAND_TYPE_CHAT_INPUT          CommandType = iota + 1 
+	COMMAND_TYPE_CHAT_INPUT CommandType = iota + 1
 	COMMAND_TYPE_USER
 	COMMAND_TYPE_MESSAGE
 )
 
 type CommandInteraction struct {
-	ID              Snowflake              `json:"id"`
-	ApplicationID   Snowflake              `json:"application_id"`
-	Type            InteractionType        `json:"type"`
-	Data            CommandInteractionData `json:"data"`
-	GuildID         Snowflake              `json:"guild_id,omitempty"`
-	ChannelID       Snowflake              `json:"channel_id,omitempty"`
-	Member          *Member                `json:"member,omitempty"`
-	User            *User                  `json:"user,omitempty"`
-	Token           string                 `json:"token"`
+	ID            Snowflake              `json:"id"`
+	ApplicationID Snowflake              `json:"application_id"`
+	Type          InteractionType        `json:"type"`
+	Data          CommandInteractionData `json:"data"`
+	GuildID       Snowflake              `json:"guild_id,omitempty"`
+	ChannelID     Snowflake              `json:"channel_id,omitempty"`
+	Member        *Member                `json:"member,omitempty"`
+	User          *User                  `json:"user,omitempty"`
+	Token         string                 `json:"token"`
 
 	Bot *Bot `json:"-"`
 }
@@ -60,12 +61,13 @@ type CommandInteractionData struct {
 }
 
 type Member struct {
-	User                       *User             `json:"user,omitempty"`
-	Nickname                   string            `json:"nick,omitempty"`
-	GuildAvatarHash            string            `json:"avatar,omitempty"`
+	User            *User  `json:"user,omitempty"`
+	Nickname        string `json:"nick,omitempty"`
+	GuildAvatarHash string `json:"avatar,omitempty"`
 
 	GuildID Snowflake `json:"-"`
 }
+
 func (member Member) GuildAvatarURL() string {
 	if member.GuildAvatarHash == "" {
 		return ""
@@ -79,11 +81,12 @@ func (member Member) GuildAvatarURL() string {
 }
 
 type User struct {
-	ID                   Snowflake         `json:"id"`
-	Username             string            `json:"username"`
-	GlobalName           string            `json:"global_name,omitempty"`
-	AvatarHash           string            `json:"avatar,omitempty"`
+	ID         Snowflake `json:"id"`
+	Username   string    `json:"username"`
+	GlobalName string    `json:"global_name,omitempty"`
+	AvatarHash string    `json:"avatar,omitempty"`
 }
+
 func (user User) AvatarURL() string {
 	if user.AvatarHash == "" {
 		return DISCORD_CDN_URL + "/embed/avatars/" + strconv.FormatUint(uint64(user.ID>>22)%6, 10) + ".png"
@@ -101,17 +104,25 @@ type CommandInteractionOption struct {
 }
 
 type InteractionDataResolved struct {
-	Users       map[Snowflake]*User           `json:"users,omitempty"`
-	Members     map[Snowflake]*Member         `json:"members,omitempty"`
-	Messages    map[Snowflake]*Message        `json:"messages,omitempty"`
+	Users       map[Snowflake]*User       `json:"users,omitempty"`
+	Members     map[Snowflake]*Member     `json:"members,omitempty"`
+	Messages    map[Snowflake]*Message    `json:"messages,omitempty"`
+	Attachments map[Snowflake]*Attachment `json:"attachments,omitempty"`
+}
+func (data *InteractionDataResolved) String() string {
+	return "Users: " + strconv.Itoa(len(data.Users)) +
+		", Members: " + strconv.Itoa(len(data.Members)) +
+		", Messages: " + strconv.Itoa(len(data.Messages)) +
+		", Attachments: " + strconv.Itoa(len(data.Attachments))
 }
 
 type Message struct {
-	ID                Snowflake           `json:"id"`
-	Author            *User               `json:"author,omitempty"`
+	ID     Snowflake `json:"id"`
+	Author *User     `json:"author,omitempty"`
 }
 
 type OptionType uint8
+
 const (
 	SUB_OPTION_TYPE OptionType = iota + 1
 	_                          // OPTION_SUB_COMMAND_GROUP (not supported)

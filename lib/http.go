@@ -4,12 +4,11 @@ import (
 	"bytes"
 	"crypto/ed25519"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
-	"log/slog"
 	"mime/multipart"
 	"net/http"
+	"petpet/logging"
 )
 
 type ResponseType uint8
@@ -51,6 +50,7 @@ func (bot *Bot) DiscordRequestHandler(w http.ResponseWriter, r *http.Request) {
 	verified := verifyDiscordRequest(r, ed25519.PublicKey(bot.PublicKey))
 	if !verified {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		logging.Error("Unauthorized request to Discord endpoint", "remote_addr", r.RemoteAddr)
 		return
 	}
 
@@ -60,6 +60,7 @@ func (bot *Bot) DiscordRequestHandler(w http.ResponseWriter, r *http.Request) {
 	n, err := r.Body.Read(*buf)
 	if err != nil && err != io.EOF {
 		http.Error(w, "bad request - failed to read body payload", http.StatusBadRequest)
+		logging.Error("Failed to read request body", "error", err)
 		return
 	}
 	defer r.Body.Close()
@@ -67,6 +68,7 @@ func (bot *Bot) DiscordRequestHandler(w http.ResponseWriter, r *http.Request) {
 	var extractor InteractionTypeExtractor
 	if err := json.Unmarshal((*buf)[:n], &extractor); err != nil {
 		http.Error(w, "bad request - invalid body json payload", http.StatusBadRequest)
+		logging.Error("Failed to unmarshal request body", "error", err)
 		return
 	}
 
@@ -79,6 +81,7 @@ func (bot *Bot) DiscordRequestHandler(w http.ResponseWriter, r *http.Request) {
 		var interaction CommandInteraction
 		if err := json.Unmarshal((*buf)[:n], &interaction); err != nil {
 			http.Error(w, "bad request - failed to decode CommandInteraction", http.StatusBadRequest)
+			logging.Error("Failed to unmarshal CommandInteraction", "error", err)
 			return
 		}
 		bot.commandInteractionHandler(w, interaction)
@@ -149,12 +152,17 @@ func (bot *Bot) makeHttpRequestToDiscord(method string, url string, body any, fi
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		slog.Error("HTTP request failed", "error", err)
+		logging.Error("HTTP request failed", "error", err)
 		return err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return errors.New("request failed: " + resp.Status)
+		errorBody := &bytes.Buffer{}
+		if _, err := io.Copy(errorBody, resp.Body); err != nil {
+			logging.Error("Failed to read error response body", "error", err)
+			return fmt.Errorf("request failed with status %s", resp.Status)
+		}
+		logging.Error("Discord API request failed", "status", resp.Status, "body", errorBody.String())
 	}
 	return nil
 }

@@ -21,20 +21,38 @@ func main() {
 
 	log.Println("Creating new client...")
 	bot := lib.CreateBot(os.Getenv("DISCORD_BOT_TOKEN"), os.Getenv("DISCORD_PUBLIC_KEY"))
-
-	testServerID, err := lib.StringToSnowflake(os.Getenv("DISCORD_TEST_SERVER_ID")) // Register example commands only to this guild.
-	if err != nil {
-		log.Fatalln("failed to parse env variable to snowflake", err)
-	}
 	
 	log.Println("Registering commands & static components...")
 	bot.RegisterCommand(commands.Meow)
+	
 	bot.RegisterCommand(commands.Petpet)
 	bot.RegisterSubCommand(subcommands.PetpetUser, "petpet")
+	bot.RegisterSubCommand(subcommands.PetpetImageURL, "petpet")
+	bot.RegisterSubCommand(subcommands.PetpetImageUpload, "petpet")
+
+	bot.RegisterCommand(commands.PetpetMsgCtx)
+	bot.RegisterCommand(commands.PetpetUserCtx)
+	bot.RegisterCommand(commands.PetpetImgCtx)
 	
-	err = bot.SyncCommandsWithDiscord([]lib.Snowflake{testServerID})
-	if err != nil {
-		log.Fatalln("failed to sync local commands storage with Discord API", err)
+
+	if os.Getenv("SYNC_COMMANDS") == "1" {
+		log.Println("Syncing commands with Discord API...")
+		if os.Getenv("TEST_SERVER_ID") != "" {
+			testServerID, err := lib.StringToSnowflake(os.Getenv("DISCORD_TEST_SERVER_ID"))
+			if err != nil {
+				log.Fatalln("failed to parse TEST_SERVER_ID", err)
+			}
+			err = bot.SyncCommandsWithDiscord([]lib.Snowflake{testServerID})
+			if err != nil {
+				log.Fatalln("failed to sync commands with Discord API", err)
+			}
+		} else {
+			log.Println("No test server ID provided, syncing commands globally...")
+			err := bot.SyncCommandsWithDiscord([]lib.Snowflake{})
+			if err != nil {
+				log.Fatalln("failed to sync commands with Discord API", err)
+			}
+		}
 	}
 	
 	http.HandleFunc("POST /", bot.DiscordRequestHandler)

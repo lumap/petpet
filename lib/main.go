@@ -35,7 +35,7 @@ func CreateBot(botToken string, publicKey string) Bot {
 		PublicKey:     decodedKey,
 		jsonBufferPool: &sync.Pool{
 			New: func() any {
-				buf := make([]byte, 4096)
+				buf := make([]byte, 8192)
 				return &buf
 			},
 		},
