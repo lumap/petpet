@@ -9,4 +9,3 @@ func Info(msg string, args ...any) {
 func Error(msg string, args ...any) {
 	slog.Error(msg, args...)
 }
-

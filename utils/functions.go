@@ -9,14 +9,14 @@ import (
 
 func IsLinkAnImageURL(url string) (bool, error) {
 	resp, err := http.Head(url)
-    if err != nil {
-        return false, err
-    }
-    defer resp.Body.Close()
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
 
-    contentType := resp.Header.Get("Content-Type")
+	contentType := resp.Header.Get("Content-Type")
 
-    return strings.HasPrefix(contentType, "image/"), nil
+	return strings.HasPrefix(contentType, "image/"), nil
 }
 
 func MakeAvatarURL(userId lib.Snowflake, hash string) string {

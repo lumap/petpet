@@ -3,13 +3,13 @@ package pet_maker
 import (
 	"bytes"
 	"fmt"
+	_ "golang.org/x/image/webp" // Register WebP format
 	"image"
 	"image/color"
 	"image/color/palette"
 	"image/draw"
 	"image/gif"
 	"image/png"
-	_ "golang.org/x/image/webp" // Register WebP format
 	"net/http"
 	"os"
 
@@ -69,14 +69,14 @@ func MakePetImage(url string, speed float64, width int, height int) *bytes.Reade
 		if err != nil {
 			panic(err)
 		}
-		
+
 		rgba := image.NewRGBA(image.Rect(0, 0, width, height))
 		draw.Draw(rgba, rgba.Bounds(), &image.Uniform{C: image.Transparent}, image.Point{}, draw.Src)
-		
+
 		left := int(0.23*float64(width)) - bounceOffset[i]
 		top := int(0.18*float64(height)) + bounceOffset[i]
 		right := int(0.98*float64(width)) + bounceOffset[i]
-		bottom := int(0.94*float64(height))
+		bottom := int(0.94 * float64(height))
 		baseTargetRect := image.Rect(left, top, right, bottom)
 		baseSrcRect := baseImg.Bounds()
 		xdraw.CatmullRom.Scale(rgba, baseTargetRect, baseImg, baseSrcRect, draw.Over, nil)
@@ -93,8 +93,8 @@ func MakePetImage(url string, speed float64, width int, height int) *bytes.Reade
 	}
 
 	outGif := &gif.GIF{
-		Image: gifFrames,
-		Delay: delays,
+		Image:    gifFrames,
+		Delay:    delays,
 		Disposal: make([]byte, len(gifFrames)),
 	}
 

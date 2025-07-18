@@ -19,6 +19,7 @@ const (
 )
 
 type Snowflake uint64
+
 func (snowflake *Snowflake) String() string {
 	return fmt.Sprintf("%d", uint64(*snowflake))
 }
@@ -48,6 +49,7 @@ type SharedMap[K comparable, V any] struct {
 	mu    sync.RWMutex
 	cache map[K]V
 }
+
 func NewSharedMap[K comparable, V any]() *SharedMap[K, V] {
 	return &SharedMap[K, V]{
 		mu:    sync.RWMutex{},

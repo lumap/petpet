@@ -12,6 +12,7 @@ import (
 )
 
 type ResponseType uint8
+
 const (
 	PONG_RESPONSE_TYPE ResponseType = iota + 1
 	ACKNOWLEDGE_RESPONSE_TYPE
@@ -25,6 +26,7 @@ type InteractionType uint8
 type InteractionTypeExtractor struct {
 	Type InteractionType `json:"type"`
 }
+
 const (
 	PING_INTERACTION_TYPE InteractionType = iota + 1
 	APPLICATION_COMMAND_INTERACTION_TYPE
@@ -36,6 +38,7 @@ var (
 )
 
 type MessageFlags BitSet
+
 const (
 	_ = 1 << iota
 	_
@@ -88,7 +91,6 @@ func (bot *Bot) DiscordRequestHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-
 
 func (bot *Bot) makeHttpRequestToDiscord(method string, url string, body any, files []DiscordFile, authRequired bool) error {
 	var req *http.Request

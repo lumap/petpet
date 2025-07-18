@@ -10,12 +10,12 @@ import (
 )
 
 type Bot struct {
-	ApplicationID    Snowflake
-	PublicKey        ed25519.PublicKey
-	Token            string
+	ApplicationID Snowflake
+	PublicKey     ed25519.PublicKey
+	Token         string
 
-	jsonBufferPool   *sync.Pool
-	commands         *SharedMap[string, Command]
+	jsonBufferPool *sync.Pool
+	commands       *SharedMap[string, Command]
 }
 
 func CreateBot(botToken string, publicKey string) Bot {

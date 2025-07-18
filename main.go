@@ -21,10 +21,10 @@ func main() {
 
 	log.Println("Creating new client...")
 	bot := lib.CreateBot(os.Getenv("DISCORD_BOT_TOKEN"), os.Getenv("DISCORD_PUBLIC_KEY"))
-	
+
 	log.Println("Registering commands & static components...")
 	bot.RegisterCommand(commands.Meow)
-	
+
 	bot.RegisterCommand(commands.Petpet)
 	bot.RegisterSubCommand(subcommands.PetpetUser, "petpet")
 	bot.RegisterSubCommand(subcommands.PetpetImageURL, "petpet")
@@ -33,7 +33,6 @@ func main() {
 	bot.RegisterCommand(commands.PetpetMsgCtx)
 	bot.RegisterCommand(commands.PetpetUserCtx)
 	bot.RegisterCommand(commands.PetpetImgCtx)
-	
 
 	if os.Getenv("SYNC_COMMANDS") == "1" {
 		log.Println("Syncing commands with Discord API...")
@@ -54,9 +53,9 @@ func main() {
 			}
 		}
 	}
-	
+
 	http.HandleFunc("POST /", bot.DiscordRequestHandler)
-	
+
 	addr := os.Getenv("DISCORD_APP_ADDRESS")
 	log.Printf("Serving application at: %s/\n", addr)
 	if err := http.ListenAndServe(addr, nil); err != nil {

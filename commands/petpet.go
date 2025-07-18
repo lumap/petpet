@@ -5,6 +5,6 @@ import (
 )
 
 var Petpet lib.Command = lib.Command{
-	Name:             "petpet",
-	Description:      "Petpet someone. Easy.",
+	Name:        "petpet",
+	Description: "Petpet someone. Easy.",
 }

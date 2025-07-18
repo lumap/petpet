@@ -109,6 +109,7 @@ type InteractionDataResolved struct {
 	Messages    map[Snowflake]*Message    `json:"messages,omitempty"`
 	Attachments map[Snowflake]*Attachment `json:"attachments,omitempty"`
 }
+
 func (data *InteractionDataResolved) String() string {
 	return "Users: " + strconv.Itoa(len(data.Users)) +
 		", Members: " + strconv.Itoa(len(data.Members)) +

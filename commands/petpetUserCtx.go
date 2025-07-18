@@ -8,8 +8,8 @@ import (
 )
 
 var PetpetUserCtx = lib.Command{
-	Type: 2,
-	Name: "Petpet this user",
+	Type:        2,
+	Name:        "Petpet this user",
 	Description: "",
 	CommandHandler: func(interaction *lib.CommandInteraction) {
 		userId := interaction.Data.TargetID
