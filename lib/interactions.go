@@ -3,7 +3,6 @@ package lib
 import (
 	"errors"
 	"net/http"
-	"petpet/logging"
 )
 
 // https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object
@@ -36,15 +35,19 @@ func (bot *Bot) commandInteractionHandler(w http.ResponseWriter, interaction Com
 	interaction, command, available := bot.handleInteraction(interaction)
 	if !available {
 		w.Header().Add("Content-Type", CONTENT_TYPE_JSON)
-		w.Write(bodyUnknownCommandResponse)
-		logging.Error("Command unavailable", "command", interaction.Data.Name, "guild", interaction.GuildID, "user", interaction.User.ID)
+		if _, err := w.Write(bodyUnknownCommandResponse); err != nil {
+			http.Error(w, "internal server error - failed to write response", http.StatusInternalServerError)
+			LogError("Failed to write unknown command response", "error", err, "interaction_id", interaction.ID, "user_id", interaction.User.ID)
+			return
+		}
+		LogError("Command unavailable", "command", interaction.Data.Name, "guild", interaction.GuildID, "user", interaction.User.ID)
 		return
 	}
 
 	w.WriteHeader(http.StatusNoContent)
 	interaction.Bot = bot
 
-	logging.Info("Command executed", "command", command.Name)
+	LogInfo("Command executed", "command", command.Name)
 
 	command.CommandHandler(&interaction)
 }
@@ -71,50 +74,53 @@ func (bot *Bot) handleInteraction(interaction CommandInteraction) (CommandIntera
 	return interaction, command, available
 }
 
-func (interaction CommandInteraction) Defer(ephemeral bool) error {
+func (interaction CommandInteraction) Defer(ephemeral bool) {
 	var flags MessageFlags = 0
 
 	if ephemeral {
 		flags = MESSAGE_FLAG_EPHEMERAL
 	}
 
-	err := interaction.Bot.makeHttpRequestToDiscord(http.MethodPost, "/interactions/"+interaction.ID.String()+"/"+interaction.Token+"/callback", ResponseMessage{
+	if err := interaction.Bot.makeHttpRequestToDiscord(http.MethodPost, "/interactions/"+interaction.ID.String()+"/"+interaction.Token+"/callback", ResponseMessage{
 		Type: DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE_RESPONSE_TYPE,
 		Data: &ResponseMessageData{
 			Flags: flags,
 		},
-	}, nil, false)
-
-	return err
+	}, nil, false); err != nil {
+		LogError("Failed to defer interaction", "error", err, "interaction_id", interaction.ID, "user_id", interaction.User.ID)
+		return
+	}
 }
 
-func (interaction CommandInteraction) SendReply(reply ResponseMessageData, ephemeral bool, files []DiscordFile) error {
+func (interaction CommandInteraction) SendReply(reply ResponseMessageData, ephemeral bool, files []DiscordFile) {
 	if ephemeral && reply.Flags == 0 {
 		reply.Flags = MESSAGE_FLAG_EPHEMERAL
 	}
 
-	err := interaction.Bot.makeHttpRequestToDiscord(http.MethodPost, "/interactions/"+interaction.ID.String()+"/"+interaction.Token+"/callback", ResponseMessage{
+	if err := interaction.Bot.makeHttpRequestToDiscord(http.MethodPost, "/interactions/"+interaction.ID.String()+"/"+interaction.Token+"/callback", ResponseMessage{
 		Type: CHANNEL_MESSAGE_WITH_SOURCE_RESPONSE_TYPE,
 		Data: &reply,
-	}, files, false)
-
-	return err
+	}, files, false); err != nil {
+		LogError("Failed to send interaction reply", "error", err, "interaction_id", interaction.ID, "user_id", interaction.User.ID)
+		return
+	}
 }
 
-func (interaction CommandInteraction) SendSimpleReply(content string, ephemeral bool) error {
-	return interaction.SendReply(ResponseMessageData{
+func (interaction CommandInteraction) SendSimpleReply(content string, ephemeral bool) {
+	interaction.SendReply(ResponseMessageData{
 		Content: content,
 	}, ephemeral, nil)
 }
 
-func (interaction CommandInteraction) EditReply(reply ResponseMessageData, ephemeral bool, files []DiscordFile) error {
+func (interaction CommandInteraction) EditReply(reply ResponseMessageData, ephemeral bool, files []DiscordFile) {
 	if ephemeral && reply.Flags == 0 {
 		reply.Flags = MESSAGE_FLAG_EPHEMERAL
 	}
 
-	err := interaction.Bot.makeHttpRequestToDiscord(http.MethodPatch, "/webhooks/"+interaction.Bot.ApplicationID.String()+"/"+interaction.Token+"/messages/@original", reply, files, false)
-
-	return err
+	if err := interaction.Bot.makeHttpRequestToDiscord(http.MethodPatch, "/webhooks/"+interaction.Bot.ApplicationID.String()+"/"+interaction.Token+"/messages/@original", reply, files, false); err != nil {
+		LogError("Failed to edit interaction reply", "error", err, "interaction_id", interaction.ID, "user_id", interaction.User.ID)
+		return
+	}
 }
 
 func (interaction CommandInteraction) GetIntOptionValue(name string, fallback int) (int, error) {

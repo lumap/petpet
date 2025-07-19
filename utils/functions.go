@@ -12,7 +12,6 @@ func IsLinkAnImageURL(url string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	defer resp.Body.Close()
 
 	contentType := resp.Header.Get("Content-Type")
 

@@ -11,10 +11,11 @@ import (
 
 func StringToSnowflake(s string) (Snowflake, error) {
 	var id Snowflake
-	_, err := fmt.Sscanf(s, "%d", &id)
-	if err != nil {
+	
+	if _, err := fmt.Sscanf(s, "%d", &id); err != nil {
 		return 0, fmt.Errorf("failed to parse string to uint64: %w", err)
 	}
+
 	return id, nil
 }
 
@@ -42,17 +43,15 @@ func verifyDiscordRequest(r *http.Request, key ed25519.PublicKey) bool {
 
 	msg.WriteString(timestamp)
 
-	defer r.Body.Close()
+	defer CloseBody(r.Body)
 	var body bytes.Buffer
 
-	// Copy the original body back into the request after finishing.
+
 	defer func() {
 		r.Body = io.NopCloser(&body)
 	}()
 
-	// Copy body into buffers
-	_, err = io.Copy(&msg, io.TeeReader(r.Body, &body))
-	if err != nil {
+	if _, err = io.Copy(&msg, io.TeeReader(r.Body, &body)); err != nil {
 		return false
 	}
 

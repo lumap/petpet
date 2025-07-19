@@ -3,7 +3,6 @@ package pet_maker
 import (
 	"bytes"
 	"fmt"
-	_ "golang.org/x/image/webp" // Register WebP format
 	"image"
 	"image/color"
 	"image/color/palette"
@@ -12,6 +11,9 @@ import (
 	"image/png"
 	"net/http"
 	"os"
+	"petpet/lib"
+
+	_ "golang.org/x/image/webp" // Register WebP format
 
 	xdraw "golang.org/x/image/draw"
 )
@@ -21,7 +23,7 @@ func loadImageFromURL(url string) (image.Image, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer lib.CloseBody(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("failed to fetch image: status code %d", resp.StatusCode)
@@ -36,14 +38,23 @@ func loadImageFromURL(url string) (image.Image, error) {
 
 func loadPNG(path string) (image.Image, error) {
 	f, err := os.Open(path)
+
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+
+	defer func() {
+		if err := f.Close(); err != nil {
+			lib.LogError("error closing file: %v\n", err)
+		}
+	}()
+
 	img, err := png.Decode(f)
+
 	if err != nil {
 		return nil, err
 	}
+
 	return img, nil
 }
 
@@ -103,8 +114,7 @@ func MakePetImage(url string, speed float64, width int, height int) *bytes.Reade
 	}
 
 	var bufMem bytes.Buffer
-	err = gif.EncodeAll(&bufMem, outGif)
-	if err != nil {
+	if err = gif.EncodeAll(&bufMem, outGif); err != nil {
 		panic(err)
 	}
 	return bytes.NewReader(bufMem.Bytes())

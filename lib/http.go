@@ -8,7 +8,6 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
-	"petpet/logging"
 )
 
 type ResponseType uint8
@@ -53,7 +52,7 @@ func (bot *Bot) DiscordRequestHandler(w http.ResponseWriter, r *http.Request) {
 	verified := verifyDiscordRequest(r, ed25519.PublicKey(bot.PublicKey))
 	if !verified {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
-		logging.Error("Unauthorized request to Discord endpoint", "remote_addr", r.RemoteAddr)
+		LogError("Unauthorized request to Discord endpoint", "remote_addr", r.RemoteAddr)
 		return
 	}
 
@@ -63,28 +62,32 @@ func (bot *Bot) DiscordRequestHandler(w http.ResponseWriter, r *http.Request) {
 	n, err := r.Body.Read(*buf)
 	if err != nil && err != io.EOF {
 		http.Error(w, "bad request - failed to read body payload", http.StatusBadRequest)
-		logging.Error("Failed to read request body", "error", err)
+		LogError("Failed to read request body", "error", err)
 		return
 	}
-	defer r.Body.Close()
+
+	defer CloseBody(r.Body)
 
 	var extractor InteractionTypeExtractor
 	if err := json.Unmarshal((*buf)[:n], &extractor); err != nil {
 		http.Error(w, "bad request - invalid body json payload", http.StatusBadRequest)
-		logging.Error("Failed to unmarshal request body", "error", err)
+		LogError("Failed to unmarshal request body", "error", err)
 		return
 	}
 
 	switch extractor.Type {
 	case PING_INTERACTION_TYPE:
 		w.Header().Add("Content-Type", CONTENT_TYPE_JSON)
-		w.Write(bodyPingResponse)
+		if _, err = w.Write(bodyPingResponse); err != nil {
+			http.Error(w, "internal server error - failed to write response", http.StatusInternalServerError)
+			LogError("Failed to write ping response", "error", err)
+		}
 		return
 	case APPLICATION_COMMAND_INTERACTION_TYPE:
 		var interaction CommandInteraction
 		if err := json.Unmarshal((*buf)[:n], &interaction); err != nil {
 			http.Error(w, "bad request - failed to decode CommandInteraction", http.StatusBadRequest)
-			logging.Error("Failed to unmarshal CommandInteraction", "error", err)
+			LogError("Failed to unmarshal CommandInteraction", "error", err)
 			return
 		}
 		bot.commandInteractionHandler(w, interaction)
@@ -154,19 +157,30 @@ func (bot *Bot) makeHttpRequestToDiscord(method string, url string, body any, fi
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		logging.Error("HTTP request failed", "error", err)
+		LogError("HTTP request failed", "error", err)
 		return err
 	}
-	defer resp.Body.Close()
+
+	defer CloseBody(resp.Body)
+
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		errorBody := &bytes.Buffer{}
 		if _, err := io.Copy(errorBody, resp.Body); err != nil {
-			logging.Error("Failed to read error response body", "error", err)
+			LogError("Failed to read error response body", "error", err)
 			return fmt.Errorf("request failed with status %s", resp.Status)
 		}
-		logging.Error("Discord API request failed", "status", resp.Status, "body", errorBody.String())
+		LogError("Discord API request failed", "status", resp.Status, "body", errorBody.String())
 	}
+
 	return nil
+}
+
+func CloseBody(body io.ReadCloser) {
+	if body != nil {
+		if err := body.Close(); err != nil {
+			LogError("Failed to close body", "error", err)
+		}
+	}
 }
 
 // DiscordFile represents a file to upload to Discord.
@@ -192,8 +206,4 @@ func (rc *readCloserWrapper) Read(p []byte) (n int, err error) {
 		return 0, io.EOF
 	}
 	return rc.Reader.Read(p)
-}
-
-func (rc *readCloserWrapper) Close() error {
-	return nil
 }

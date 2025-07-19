@@ -41,14 +41,12 @@ func main() {
 			if err != nil {
 				log.Fatalln("failed to parse TEST_SERVER_ID", err)
 			}
-			err = bot.SyncCommandsWithDiscord([]lib.Snowflake{testServerID})
-			if err != nil {
+			if err = bot.SyncCommandsWithDiscord([]lib.Snowflake{testServerID}); err != nil {
 				log.Fatalln("failed to sync commands with Discord API", err)
 			}
 		} else {
 			log.Println("No test server ID provided, syncing commands globally...")
-			err := bot.SyncCommandsWithDiscord([]lib.Snowflake{})
-			if err != nil {
+			if err := bot.SyncCommandsWithDiscord([]lib.Snowflake{}); err != nil {
 				log.Fatalln("failed to sync commands with Discord API", err)
 			}
 		}

@@ -2,7 +2,6 @@ package commands
 
 import (
 	"petpet/lib"
-	"petpet/logging"
 	"petpet/pet_maker"
 	"petpet/utils"
 	"slices"
@@ -14,7 +13,7 @@ var PetpetMsgCtx = lib.Command{
 	Description: "",
 	CommandHandler: func(interaction *lib.CommandInteraction) {
 		messageId := interaction.Data.TargetID
-		logging.Info(interaction.Data.Resolved.String())
+		lib.LogInfo(interaction.Data.Resolved.String())
 		user := interaction.Data.Resolved.Messages[messageId].Author
 
 		if slices.Contains(utils.BlacklistedUsers, user.ID) {

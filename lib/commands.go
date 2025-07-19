@@ -1,7 +1,6 @@
 package lib
 
 import (
-	"errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -138,9 +137,10 @@ const (
 	ATTACHMENT_OPTION_TYPE
 )
 
-func (bot *Bot) RegisterCommand(cmd Command) error {
+func (bot *Bot) RegisterCommand(cmd Command) {
 	if bot.commands.Has(cmd.Name) {
-		return errors.New("bot already has registered \"" + cmd.Name + "\" slash command (name already in use)")
+		LogError("bot already has registered \"" + cmd.Name + "\" slash command (name is already in use)")
+		return
 	}
 
 	if cmd.Type == 0 {
@@ -148,17 +148,19 @@ func (bot *Bot) RegisterCommand(cmd Command) error {
 	}
 
 	bot.commands.Set(cmd.Name, cmd)
-	return nil
+
 }
 
-func (bot *Bot) RegisterSubCommand(subCommand Command, parentCommandName string) error {
+func (bot *Bot) RegisterSubCommand(subCommand Command, parentCommandName string) {
 	if !bot.commands.Has(parentCommandName) {
-		return errors.New("missing \"" + parentCommandName + "\" slash command in registry (parent command needs to be registered in bot before adding subcommands)")
+		LogError("missing \"" + parentCommandName + "\" slash command in registry (parent command needs to be registered in bot before adding subcommands)")
+		return
 	}
 
 	finalName := parentCommandName + "@" + subCommand.Name
 	if bot.commands.Has(finalName) {
-		return errors.New("bot already has registered \"" + finalName + "\" slash command (name for subcommand is already in use)")
+		LogError("bot already has registered \"" + finalName + "\" slash command (name for subcommand is already in use)")
+		return
 	}
 
 	if subCommand.Type == 0 {
@@ -166,7 +168,6 @@ func (bot *Bot) RegisterSubCommand(subCommand Command, parentCommandName string)
 	}
 
 	bot.commands.Set(finalName, subCommand)
-	return nil
 }
 
 func (bot *Bot) SyncCommandsWithDiscord(guildIDs []Snowflake) error {
