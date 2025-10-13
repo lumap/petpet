@@ -30,9 +30,9 @@ func processUser(interaction *lib.CommandInteraction, files *[]lib.DiscordFile, 
 		return
 	}
 
-	avatar := member.GuildAvatarURL()
-	if !useServerAvatar || avatar == "" {
-		avatar = user.AvatarURL()
+	avatar := user.AvatarURL()
+	if useServerAvatar && member != nil {
+		avatar = member.GuildAvatarURL()
 	}
 
 	speed, err := interaction.GetFloatOptionValue("speed", 1.0)

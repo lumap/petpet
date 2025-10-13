@@ -40,7 +40,7 @@ func (bot *Bot) commandInteractionHandler(w http.ResponseWriter, interaction Com
 			LogError("Failed to write unknown command response", "error", err, "interaction_id", interaction.ID, "user_id", interaction.User.ID)
 			return
 		}
-		LogError("Command unavailable", "command", interaction.Data.Name, "guild", interaction.GuildID, "user", interaction.User.ID)
+		LogError("Command unavailable", "command", interaction.Data.Name, "guild", interaction.GuildID)
 		return
 	}
 
