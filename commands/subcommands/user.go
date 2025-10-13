@@ -31,7 +31,7 @@ func processUser(interaction *lib.CommandInteraction, files *[]lib.DiscordFile, 
 	}
 
 	avatar := user.AvatarURL()
-	if useServerAvatar && member != nil {
+	if useServerAvatar && member != nil && member.GuildAvatarHash != "" {
 		avatar = member.GuildAvatarURL()
 	}
 
