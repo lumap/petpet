@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"errors"
+	"math"
 	"strings"
 	"sync"
 )
@@ -35,7 +36,7 @@ func CreateBot(botToken string, publicKey string) Bot {
 		PublicKey:     decodedKey,
 		jsonBufferPool: &sync.Pool{
 			New: func() any {
-				buf := make([]byte, 8192)
+				buf := make([]byte, int(math.Pow(2, 15)))
 				return &buf
 			},
 		},
