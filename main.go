@@ -30,14 +30,14 @@ func main() {
 	bot.RegisterSubCommand(subcommands.PetpetImageURL, "petpet")
 	bot.RegisterSubCommand(subcommands.PetpetImageUpload, "petpet")
 
-	bot.RegisterCommand(commands.PetpetMsgCtx)
-	bot.RegisterCommand(commands.PetpetUserCtx)
-	bot.RegisterCommand(commands.PetpetImgCtx)
+	// bot.RegisterCommand(commands.PetpetMsgCtx)
+	// bot.RegisterCommand(commands.PetpetUserCtx)
+	// bot.RegisterCommand(commands.PetpetImgCtx)
 
 	if os.Getenv("SYNC_COMMANDS") == "1" {
 		log.Println("Syncing commands with Discord API...")
 		if os.Getenv("TEST_SERVER_ID") != "" {
-			testServerID, err := lib.StringToSnowflake(os.Getenv("DISCORD_TEST_SERVER_ID"))
+			testServerID, err := lib.StringToSnowflake(os.Getenv("TEST_SERVER_ID"))
 			if err != nil {
 				log.Fatalln("failed to parse TEST_SERVER_ID", err)
 			}

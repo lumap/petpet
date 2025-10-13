@@ -1,0 +1,1 @@
+gcloud run deploy petpet --source . --allow-unauthenticated --region=us-west1

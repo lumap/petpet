@@ -42,14 +42,68 @@ var PetpetCommandOptions = []lib.CommandOption{
 var PetpetCommandUserOptions = []lib.CommandOption{
 	{
 		Type:        6,
-		Name:        "user_to_petpet",
+		Name:        "user",
 		Description: "The user to petpet",
 		Required:    true,
 	},
 	{
+		Type:        6,
+		Name:        "user2",
+		Description: "The second user to petpet",
+		Required:    false,
+	},
+	{
+		Type:        6,
+		Name:        "user3",
+		Description: "The third user to petpet",
+		Required:    false,
+	},
+	{
+		Type:        6,
+		Name:        "user4",
+		Description: "The fourth user to petpet",
+		Required:    false,
+	},
+	// {
+	// 	Type:        6,
+	// 	Name:        "user5",
+	// 	Description: "The fifth user to petpet",
+	// 	Required:    false,
+	// },
+	// {
+	// 	Type:        6,
+	// 	Name:        "user6",
+	// 	Description: "The sixth user to petpet",
+	// 	Required:    false,
+	// },
+	// {
+	// 	Type:        6,
+	// 	Name:        "user7",
+	// 	Description: "The seventh user to petpet",
+	// 	Required:    false,
+	// },
+	// {
+	// 	Type:        6,
+	// 	Name:        "user8",
+	// 	Description: "The eighth user to petpet",
+	// 	Required:    false,
+	// },
+	// {
+	// 	Type:        6,
+	// 	Name:        "user9",
+	// 	Description: "The ninth user to petpet",
+	// 	Required:    false,
+	// },
+	// {
+	// 	Type:        6,
+	// 	Name:        "user10",
+	// 	Description: "The tenth user to petpet",
+	// 	Required:    false,
+	// },
+	{
 		Type:        5,
 		Name:        "use_server_avatar",
-		Description: "Whether to use the server avatar of the user (default is false)",
+		Description: "Whether to use the server avatars (default is true; applies to all users)",
 		Required:    false,
 	},
 }

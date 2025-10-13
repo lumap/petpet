@@ -20,7 +20,7 @@ var PetpetImageUpload = lib.Command{
 
 		imageId, err := lib.StringToSnowflake(untypedImage)
 		if err != nil {
-			interaction.SendSimpleReply("Couldn't parse image ID. You shouldn't see this.", true)
+			interaction.SendSimpleReply("Couldn't parse image ID.", true)
 			return
 		}
 
@@ -28,7 +28,7 @@ var PetpetImageUpload = lib.Command{
 
 		isImage, err := utils.IsLinkAnImageURL(image.URL)
 		if err != nil {
-			interaction.SendSimpleReply("Couldn't check if the URL is an image. You shouldn't see this.", true)
+			interaction.SendSimpleReply("Couldn't check if the URL is an image.", true)
 			return
 		}
 		if !isImage {
@@ -38,7 +38,7 @@ var PetpetImageUpload = lib.Command{
 
 		ephemeral, err := interaction.GetBoolOptionValue("ephemeral", false)
 		if err != nil {
-			interaction.SendSimpleReply("Couldn't parse ephemeral option. You shouldn't see this.", true)
+			interaction.SendSimpleReply("Couldn't parse ephemeral option.", true)
 			return
 		}
 
@@ -46,23 +46,26 @@ var PetpetImageUpload = lib.Command{
 
 		speed, err := interaction.GetFloatOptionValue("speed", 1.0)
 		if err != nil {
-			interaction.SendSimpleReply("Couldn't parse speed option. You shouldn't see this.", true)
+			interaction.SendSimpleReply("Couldn't parse speed option.", true)
 			return
 		}
 		width, err := interaction.GetIntOptionValue("width", 128)
 		if err != nil {
-			interaction.SendSimpleReply("Couldn't parse width option. You shouldn't see this.", true)
+			interaction.SendSimpleReply("Couldn't parse width option.", true)
 			return
 		}
 		height, err := interaction.GetIntOptionValue("height", 128)
 		if err != nil {
-			interaction.SendSimpleReply("Couldn't parse height option. You shouldn't see this.", true)
+			interaction.SendSimpleReply("Couldn't parse height option.", true)
 			return
 		}
 
 		img := pet_maker.MakePetImage(image.URL, speed, width, height)
 
-		interaction.EditReply(lib.ResponseMessageData{}, ephemeral, []lib.DiscordFile{
+		interaction.EditReply(lib.ResponseMessageData{
+			Content:         "<@" + interaction.GetUser().ID.String() + "> has pet an uploaded image :3",
+			AllowedMentions: &lib.AllowedMentions{},
+		}, ephemeral, []lib.DiscordFile{
 			{
 				Filename: "petpet.gif",
 				Reader:   img,

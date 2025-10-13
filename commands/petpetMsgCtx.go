@@ -27,7 +27,9 @@ var PetpetMsgCtx = lib.Command{
 
 		img := pet_maker.MakePetImage(avatar, 1, 128, 128)
 
-		interaction.EditReply(lib.ResponseMessageData{}, false, []lib.DiscordFile{
+		interaction.EditReply(lib.ResponseMessageData{
+			Content: "<@" + interaction.GetUser().ID.String() + "> has pet <@" + user.ID.String() + "> :33",
+		}, false, []lib.DiscordFile{
 			{
 				Filename: "petpet.gif",
 				Reader:   img,

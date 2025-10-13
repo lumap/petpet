@@ -186,45 +186,38 @@ func (bot *Bot) SyncCommandsWithDiscord(guildIDs []Snowflake) error {
 func parseCommandsForDiscordAPI(commands *SharedMap[string, Command]) []Command {
 	commands.mu.RLock()
 
-	cmdTree := make(map[string]map[string]Command, len(commands.cache))
-	cmdRootSymbol := "-"
+	cmdTree := make(map[string]Command, len(commands.cache))
 	parsedCommands := make([]Command, 0, len(commands.cache))
 
-	// Prepare nested map for reading later
+	for fullName, command := range commands.cache {
+		if !strings.Contains(fullName, "@") {
+			cmdTree[fullName] = command
+		}
+	}
+
 	for fullName, command := range commands.cache {
 		if strings.Contains(fullName, "@") {
-			names := strings.Split(fullName, "@")
-			cmdBranch := cmdTree[names[0]]
-			cmdBranch[names[1]] = command
-			cmdTree[names[0]] = cmdBranch
-		}
+			names := strings.SplitN(fullName, "@", 2)
+			parentName := names[0]
+			parentCommand, exists := cmdTree[parentName]
+			if !exists {
+				LogError("parent command \"" + parentName + "\" not found in command tree while parsing commands for Discord API")
+				continue
+			}
 
-		cmdBranch := make(map[string]Command, 0)
-		cmdBranch[cmdRootSymbol] = command
-		cmdTree[fullName] = cmdBranch
+			parentCommand.Options = append(parentCommand.Options, CommandOption{
+				Name:        command.Name,
+				Description: command.Description,
+				Type:        SUB_OPTION_TYPE,
+				Options:     command.Options,
+			})
+			cmdTree[parentName] = parentCommand
+		}
 	}
 
 	commands.mu.RUnlock()
-
-	for _, branch := range cmdTree {
-		baseCommand := branch[cmdRootSymbol]
-
-		if len(branch) > 1 {
-			for key, subCommand := range branch {
-				if key == cmdRootSymbol {
-					continue
-				}
-
-				baseCommand.Options = append(baseCommand.Options, CommandOption{
-					Name:        subCommand.Name,
-					Description: subCommand.Description,
-					Type:        SUB_OPTION_TYPE,
-					Options:     subCommand.Options,
-				})
-			}
-		}
-
-		parsedCommands = append(parsedCommands, baseCommand)
+	for _, command := range cmdTree {
+		parsedCommands = append(parsedCommands, command)
 	}
 
 	return parsedCommands

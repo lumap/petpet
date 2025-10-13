@@ -195,3 +195,13 @@ func (interaction CommandInteraction) GetAttachmentOptionId(name string, fallbac
 
 	return "", nil
 }
+
+func (interaction CommandInteraction) GetUser() *User {
+	if interaction.User != nil {
+		return interaction.User
+	}
+	if interaction.Member != nil {
+		return interaction.Member.User
+	}
+	return nil
+}
