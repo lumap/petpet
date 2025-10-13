@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -14,15 +13,15 @@ import (
 )
 
 func main() {
-	log.Println("Loading environmental variables...")
+	lib.LogInfo("Loading environmental variables...")
 	if err := godotenv.Load(".env"); err != nil {
-		log.Fatalln("failed to load env variables", err)
+		lib.LogError("failed to load env variables", err)
 	}
 
-	log.Println("Creating new client...")
+	lib.LogInfo("Creating new client...")
 	bot := lib.CreateBot(os.Getenv("DISCORD_BOT_TOKEN"), os.Getenv("DISCORD_PUBLIC_KEY"))
 
-	log.Println("Registering commands & static components...")
+	lib.LogInfo("Registering commands & static components...")
 	bot.RegisterCommand(commands.Meow)
 
 	bot.RegisterCommand(commands.Petpet)
@@ -35,19 +34,19 @@ func main() {
 	// bot.RegisterCommand(commands.PetpetImgCtx)
 
 	if os.Getenv("SYNC_COMMANDS") == "1" {
-		log.Println("Syncing commands with Discord API...")
+		lib.LogInfo("Syncing commands with Discord API...")
 		if os.Getenv("TEST_SERVER_ID") != "" {
 			testServerID, err := lib.StringToSnowflake(os.Getenv("TEST_SERVER_ID"))
 			if err != nil {
-				log.Fatalln("failed to parse TEST_SERVER_ID", err)
+				lib.LogError("failed to parse TEST_SERVER_ID", err)
 			}
 			if err = bot.SyncCommandsWithDiscord([]lib.Snowflake{testServerID}); err != nil {
-				log.Fatalln("failed to sync commands with Discord API", err)
+				lib.LogError("failed to sync commands with Discord API", err)
 			}
 		} else {
-			log.Println("No test server ID provided, syncing commands globally...")
+			lib.LogInfo("No test server ID provided, syncing commands globally...")
 			if err := bot.SyncCommandsWithDiscord([]lib.Snowflake{}); err != nil {
-				log.Fatalln("failed to sync commands with Discord API", err)
+				lib.LogError("failed to sync commands with Discord API", err)
 			}
 		}
 	}
@@ -55,8 +54,8 @@ func main() {
 	http.HandleFunc("POST /", bot.DiscordRequestHandler)
 
 	addr := os.Getenv("DISCORD_APP_ADDRESS")
-	log.Printf("Serving application at: %s/\n", addr)
+	lib.LogInfo("Serving application at: %s/\n", addr)
 	if err := http.ListenAndServe(addr, nil); err != nil {
-		log.Fatalln("something went terribly wrong", err)
+		lib.LogError("something went terribly wrong", err)
 	}
 }
