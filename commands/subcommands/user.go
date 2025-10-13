@@ -32,7 +32,7 @@ func processUser(interaction *lib.CommandInteraction, files *[]lib.DiscordFile, 
 
 	avatar := user.AvatarURL()
 	if useServerAvatar && member != nil && member.GuildAvatarHash != "" {
-		avatar = member.GuildAvatarURL(interaction.GuildID.String())
+		avatar = member.GuildAvatarURL(interaction.GuildID.String(), userId.String())
 	}
 
 	speed, err := interaction.GetFloatOptionValue("speed", 1.0)

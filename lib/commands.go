@@ -65,16 +65,16 @@ type Member struct {
 	GuildAvatarHash string `json:"avatar,omitempty"`
 }
 
-func (member Member) GuildAvatarURL(guildId string) string {
+func (member Member) GuildAvatarURL(guildId string, userId string) string {
 	if member.GuildAvatarHash == "" {
 		return ""
 	}
 
-	if guildId == "" {
+	if guildId == "" || userId == "" {
 		return ""
 	}
 
-	return DISCORD_CDN_URL + "/guilds/" + guildId + "/users/" + member.User.ID.String() + "/avatars/" + member.GuildAvatarHash + ".png"
+	return DISCORD_CDN_URL + "/guilds/" + guildId + "/users/" + userId + "/avatars/" + member.GuildAvatarHash + ".png"
 }
 
 type User struct {
