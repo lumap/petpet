@@ -22,7 +22,7 @@ var PetpetUserCtx = lib.Command{
 		member := interaction.Data.Resolved.Members[userId]
 		user := interaction.Data.Resolved.Users[userId]
 
-		avatar := member.GuildAvatarURL()
+		avatar := member.GuildAvatarURL(interaction.GuildID.String())
 		if avatar == "" {
 			avatar = user.AvatarURL()
 		}

@@ -63,20 +63,18 @@ type Member struct {
 	User            *User  `json:"user,omitempty"`
 	Nickname        string `json:"nick,omitempty"`
 	GuildAvatarHash string `json:"avatar,omitempty"`
-
-	GuildID Snowflake `json:"-"`
 }
 
-func (member Member) GuildAvatarURL() string {
+func (member Member) GuildAvatarURL(guildId string) string {
 	if member.GuildAvatarHash == "" {
 		return ""
 	}
 
-	if member.GuildID == 0 {
-		panic("member struct is missing guild ID which is required in avatar url method - it appears to be problem of your custom tempest client implementation")
+	if guildId == "" {
+		return ""
 	}
 
-	return DISCORD_CDN_URL + "/guilds/" + member.GuildID.String() + "/users/" + member.User.ID.String() + "/avatars/" + member.GuildAvatarHash + ".png"
+	return DISCORD_CDN_URL + "/guilds/" + guildId + "/users/" + member.User.ID.String() + "/avatars/" + member.GuildAvatarHash + ".png"
 }
 
 type User struct {

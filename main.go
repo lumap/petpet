@@ -29,9 +29,9 @@ func main() {
 	bot.RegisterSubCommand(subcommands.PetpetImageURL, "petpet")
 	bot.RegisterSubCommand(subcommands.PetpetImageUpload, "petpet")
 
-	// bot.RegisterCommand(commands.PetpetMsgCtx)
-	// bot.RegisterCommand(commands.PetpetUserCtx)
-	// bot.RegisterCommand(commands.PetpetImgCtx)
+	bot.RegisterCommand(commands.PetpetMsgCtx)
+	bot.RegisterCommand(commands.PetpetUserCtx)
+	bot.RegisterCommand(commands.PetpetImgCtx)
 
 	if os.Getenv("SYNC_COMMANDS") == "1" {
 		lib.LogInfo("Syncing commands with Discord API...")

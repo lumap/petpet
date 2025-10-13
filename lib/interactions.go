@@ -57,17 +57,9 @@ func (bot *Bot) handleInteraction(interaction CommandInteraction) (CommandIntera
 		finalName := interaction.Data.Name + "@" + interaction.Data.Options[0].Name
 		subCommand, available := bot.commands.Get(finalName)
 		if available {
-			if interaction.Member != nil {
-				interaction.Member.GuildID = interaction.GuildID
-			}
-
 			interaction.Data.Name, interaction.Data.Options = finalName, interaction.Data.Options[0].Options
 		}
 		return interaction, subCommand, available
-	}
-
-	if interaction.Member != nil {
-		interaction.Member.GuildID = interaction.GuildID
 	}
 
 	command, available := bot.commands.Get(interaction.Data.Name)
