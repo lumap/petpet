@@ -8,12 +8,14 @@ import (
 	"image/color/palette"
 	"image/draw"
 	"image/gif"
-	"image/png"
 	"net/http"
 	"os"
 	"petpet/lib"
-
-	_ "golang.org/x/image/webp" // Register WebP format
+	
+	"image/png"
+	_ "image/jpeg"
+	_ "image/gif"
+	_ "golang.org/x/image/webp"
 
 	xdraw "golang.org/x/image/draw"
 )
