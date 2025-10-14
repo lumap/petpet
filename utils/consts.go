@@ -2,8 +2,8 @@ package utils
 
 import "petpet/lib"
 
-var BlacklistedUsers = []lib.Snowflake{
-	1118171067463241868,
+var BlacklistedUsers = []string{
+	"1118171067463241868",
 }
 
 var PetpetCommandOptions = []lib.CommandOption{

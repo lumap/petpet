@@ -14,7 +14,7 @@ var PetpetUserCtx = lib.Command{
 	CommandHandler: func(interaction *lib.CommandInteraction) {
 		userId := interaction.Data.TargetID
 
-		if slices.Contains(utils.BlacklistedUsers, userId) {
+		if slices.Contains(utils.BlacklistedUsers, userId.String()) {
 			interaction.SendSimpleReply("This user is blacklisted, sorry.", true)
 			return
 		}

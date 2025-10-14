@@ -16,11 +16,6 @@ func processUser(interaction *lib.CommandInteraction, files *[]lib.DiscordFile, 
 		return
 	}
 
-	if slices.Contains(utils.BlacklistedUsers, userId) {
-		interaction.SendSimpleReply("This user is blacklisted, sorry.", true)
-		return
-	}
-
 	member := interaction.Data.Resolved.Members[userId]
 	user := interaction.Data.Resolved.Users[userId]
 
@@ -74,6 +69,7 @@ var PetpetUser = lib.Command{
 
 		files := []lib.DiscordFile{}
 		userIDs := []string{}
+		blacklistDetected := false
 
 		// it can support up to 10 but i'm not gonna bother implementing more than 4 until i figure out monetization
 		for i := 1; i <= 4; i++ {
@@ -83,11 +79,16 @@ var PetpetUser = lib.Command{
 			}
 			user, err := interaction.GetStringOptionValue(optionName, "")
 			if err == nil && user != "" {
+				if slices.Contains(utils.BlacklistedUsers, user) {
+					blacklistDetected = true
+					continue
+				}
 				userIDs = append(userIDs, user)
 				processUser(interaction, &files, user)
 			}
 		}
 
+		content := "<@" + interaction.GetUser().ID.String() + "> has pet "
 		// format user IDs to be mentions
 		for i, id := range userIDs {
 			userIDs[i] = fmt.Sprintf("<@%s>", id)
@@ -99,9 +100,13 @@ var PetpetUser = lib.Command{
 			lastComma := strings.LastIndex(mentionedUsers, ", ")
 			mentionedUsers = mentionedUsers[:lastComma] + " and" + mentionedUsers[lastComma+1:]
 		}
+		content += mentionedUsers + " :3"
+		if blacklistDetected {
+			content += "\n-# A user you tried to petpet has been blacklisted and was ignored."
+		}
 
 		interaction.EditReply(lib.ResponseMessageData{
-			Content:         "<@" + interaction.GetUser().ID.String() + "> has pet " + mentionedUsers + " :3",
+			Content:         content,
 			AllowedMentions: &lib.AllowedMentions{},
 		}, ephemeral, files)
 	},

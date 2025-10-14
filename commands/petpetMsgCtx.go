@@ -16,7 +16,7 @@ var PetpetMsgCtx = lib.Command{
 		lib.LogInfo(interaction.Data.Resolved.String())
 		user := interaction.Data.Resolved.Messages[messageId].Author
 
-		if slices.Contains(utils.BlacklistedUsers, user.ID) {
+		if slices.Contains(utils.BlacklistedUsers, user.ID.String()) {
 			interaction.SendSimpleReply("This user is blacklisted, sorry.", true)
 			return
 		}
