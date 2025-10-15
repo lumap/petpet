@@ -7,10 +7,12 @@ import (
 )
 
 type Command struct {
-	Type        CommandType     `json:"type,omitempty"`
-	Name        string          `json:"name"`
-	Description string          `json:"description"`
-	Options     []CommandOption `json:"options,omitempty"`
+	Type             CommandType     `json:"type,omitempty"`
+	Name             string          `json:"name"`
+	Description      string          `json:"description"`
+	Options          []CommandOption `json:"options,omitempty"`
+	IntegrationTypes []int           `json:"integration_types,omitempty"`
+	Contexts         []int           `json:"contexts,omitempty"`
 
 	CommandHandler func(interaction *CommandInteraction) `json:"-"`
 }
@@ -33,6 +35,17 @@ const (
 	COMMAND_TYPE_CHAT_INPUT CommandType = iota + 1
 	COMMAND_TYPE_USER
 	COMMAND_TYPE_MESSAGE
+)
+
+const (
+	COMMAND_INTEGRATION_TYPE_GUILD = iota
+	COMMAND_INTEGRATION_TYPE_USER
+)
+
+const (
+	COMMAND_CONTEXT_GUILD = iota
+	COMMAND_CONTEXT_BOT_DM
+	COMMAND_CONTEXT_PRIVATE_CHANNEL
 )
 
 type CommandInteraction struct {

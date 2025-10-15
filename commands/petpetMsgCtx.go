@@ -11,6 +11,8 @@ var PetpetMsgCtx = lib.Command{
 	Type:        3,
 	Name:        "Petpet the message's author",
 	Description: "",
+	IntegrationTypes: []int{lib.COMMAND_INTEGRATION_TYPE_GUILD, lib.COMMAND_INTEGRATION_TYPE_USER},
+	Contexts:         []int{lib.COMMAND_CONTEXT_GUILD, lib.COMMAND_CONTEXT_BOT_DM, lib.COMMAND_CONTEXT_PRIVATE_CHANNEL},
 	CommandHandler: func(interaction *lib.CommandInteraction) {
 		messageId := interaction.Data.TargetID
 		lib.LogInfo(interaction.Data.Resolved.String())
@@ -29,6 +31,7 @@ var PetpetMsgCtx = lib.Command{
 
 		interaction.EditReply(lib.ResponseMessageData{
 			Content: "<@" + interaction.GetUser().ID.String() + "> has pet <@" + user.ID.String() + "> :33",
+			AllowedMentions: &lib.AllowedMentions{},
 		}, false, []lib.DiscordFile{
 			{
 				Filename: "petpet.gif",
