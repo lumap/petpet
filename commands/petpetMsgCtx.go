@@ -21,7 +21,7 @@ var PetpetMsgCtx = lib.Command{
 			return
 		}
 
-		avatar := utils.MakeAvatarURL(user.ID, user.AvatarHash)
+		avatar := user.AvatarURL()
 
 		interaction.Defer(false)
 
