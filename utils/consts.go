@@ -106,6 +106,12 @@ var PetpetCommandUserOptions = []lib.CommandOption{
 		Description: "Whether to use the server avatars (default is true; applies to all users)",
 		Required:    false,
 	},
+	{
+		Type:        5,
+		Name:        "notify_users",
+		Description: "Whether to notify the users that they've been petpet (default is false)",
+		Required:    false,
+	},
 }
 
 var PetpetCommandImageURLOptions = []lib.CommandOption{

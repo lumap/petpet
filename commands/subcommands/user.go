@@ -64,6 +64,13 @@ var PetpetUser = lib.Command{
 			interaction.SendSimpleReply("Couldn't parse ephemeral option.", true)
 			return
 		}
+		mentions := []string{}
+		if notify, err := interaction.GetBoolOptionValue("notify_users", false); err != nil {
+			interaction.SendSimpleReply("Couldn't parse notify_users option.", true)
+			return
+		} else if notify {
+			mentions = append(mentions, "users")
+		}
 
 		interaction.Defer(ephemeral)
 
@@ -107,7 +114,7 @@ var PetpetUser = lib.Command{
 
 		interaction.EditReply(lib.ResponseMessageData{
 			Content:         content,
-			AllowedMentions: &lib.AllowedMentions{},
+			AllowedMentions: &lib.AllowedMentions{Parse: mentions},
 		}, ephemeral, files)
 	},
 }
