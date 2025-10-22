@@ -110,7 +110,7 @@ func (interaction CommandInteraction) EditReply(reply ResponseMessageData, ephem
 	}
 
 	if err := interaction.Bot.makeHttpRequestToDiscord(http.MethodPatch, "/webhooks/"+interaction.Bot.ApplicationID.String()+"/"+interaction.Token+"/messages/@original", reply, files, false); err != nil {
-		LogError("Failed to edit interaction reply", "error", err, "interaction_id", interaction.ID, "user_id", interaction.User.ID)
+		LogError("Failed to edit interaction reply", "error", err, "interaction_id", interaction.ID)
 		return
 	}
 }
