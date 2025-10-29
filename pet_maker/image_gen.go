@@ -102,7 +102,7 @@ func MakePetImage(url string, speed float64, width int, height int) *bytes.Reade
 		draw.FloydSteinberg.Draw(paletted, rgba.Bounds(), rgba, image.Point{})
 
 		gifFrames = append(gifFrames, paletted)
-		delays = append(delays, int(5*speed))
+		delays = append(delays, int(5*(1/speed)))
 	}
 
 	outGif := &gif.GIF{
