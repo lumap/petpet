@@ -26,7 +26,7 @@ var PetpetCommandOptions = []lib.CommandOption{
 	{
 		Type:        10,
 		Name:        "speed",
-		Description: "How fast the petting is (default is 1, min 0.2, max 5)",
+		Description: "How fast the petting is (default 1, fastest 0.2, slowest 5)",
 		Required:    false,
 		MinValue:    0.2,
 		MaxValue:    5,
