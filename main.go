@@ -23,6 +23,7 @@ func main() {
 
 	lib.LogInfo("Registering commands & static components...")
 	bot.RegisterCommand(commands.Meow)
+	bot.RegisterCommand(commands.Donate)
 
 	bot.RegisterCommand(commands.Petpet)
 	bot.RegisterSubCommand(subcommands.PetpetUser, "petpet")
