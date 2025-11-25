@@ -78,8 +78,7 @@ var PetpetUser = lib.Command{
 		userIDs := []string{}
 		blacklistDetected := false
 
-		// it can support up to 10 but i'm not gonna bother implementing more than 4 until i figure out monetization
-		for i := 1; i <= 4; i++ {
+		for i := 1; i <= 10; i++ {
 			optionName := "user"
 			if i > 1 {
 				optionName = optionName + fmt.Sprint(i)
